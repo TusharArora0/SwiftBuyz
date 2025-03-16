@@ -51,7 +51,6 @@ import OrderHistory from '../../components/OrderHistory';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { formatPrice } from '../../utils/formatPrice';
 import { PLACEHOLDER_IMAGE } from '../../utils/placeholderImage';
-import { API_URL, fetchWithAuth } from '../../utils/apiConfig';
 
 const ConsumerProfile = () => {
   const { user, token } = useSelector((state) => state.auth);
@@ -103,20 +102,23 @@ const ConsumerProfile = () => {
   }, [activeTab, token]);
 
   const fetchWishlist = async () => {
+    if (!token) return;
+    
+    setWishlistLoading(true);
     try {
-      setWishlistLoading(true);
-      const response = await fetch(`${API_URL}/wishlist`, {
+      const response = await fetch('http://localhost:5000/api/wishlist', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      
       if (response.ok) {
         const data = await response.json();
         setWishlist(data);
       }
     } catch (error) {
       console.error('Error fetching wishlist:', error);
+      setError('Failed to load wishlist items');
+      setTimeout(() => setError(null), 3000);
     } finally {
       setWishlistLoading(false);
     }
@@ -124,19 +126,19 @@ const ConsumerProfile = () => {
 
   const handleRemoveFromWishlist = async (productId) => {
     try {
-      const response = await fetch(`${API_URL}/wishlist/${productId}`, {
+      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      
       if (response.ok) {
-        // Remove the item from the wishlist
-        setWishlist(wishlist.filter(item => item._id !== productId));
+        setWishlist(items => items.filter(item => item._id !== productId));
       }
     } catch (error) {
       console.error('Error removing from wishlist:', error);
+      setError('Failed to remove item from wishlist');
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -160,7 +162,7 @@ const ConsumerProfile = () => {
         await handleDeleteAddress(editingAddress, false);
       }
       
-      const response = await fetch(`${API_URL}/users/address`, {
+      const response = await fetch('http://localhost:5000/api/users/address', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -218,7 +220,7 @@ const ConsumerProfile = () => {
   const handleDeleteAddress = async (index, showFeedback = true) => {
     try {
       setAddressLoading(true);
-      const response = await fetch(`${API_URL}/users/address/${index}`, {
+      const response = await fetch(`http://localhost:5000/api/users/address/${index}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -274,7 +276,7 @@ const ConsumerProfile = () => {
 
   const handleEditSubmit = async () => {
     try {
-      const response = await fetch(`${API_URL}/users/profile`, {
+      const response = await fetch(`http://localhost:5000/api/users/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

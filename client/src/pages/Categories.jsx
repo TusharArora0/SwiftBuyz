@@ -40,7 +40,6 @@ import { formatPrice } from '../utils/formatPrice';
 import { PLACEHOLDER_IMAGE } from '../utils/placeholderImage';
 import { styled } from '@mui/material/styles';
 import { fadeIn, fadeInUp, pulse, getFadeInUpStaggered, shimmer } from '../utils/animations';
-import { API_URL, fetchWithAuth } from '../utils/apiConfig';
 
 // Styled Components
 const CategoryCard = styled(Card)(({ theme }) => ({
@@ -246,7 +245,6 @@ const Categories = () => {
   const [quantities, setQuantities] = useState({});
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [productsLoading, setProductsLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     // If a category is specified in the URL, fetch products for that category
@@ -254,7 +252,7 @@ const Categories = () => {
       const category = categories.find(cat => cat.value === categoryParam);
       if (category) {
         setSelectedCategory(category);
-        fetchProductsByCategory(categoryParam);
+        fetchCategoryProducts(categoryParam);
         // Smooth scroll to top when category changes
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
@@ -272,34 +270,25 @@ const Categories = () => {
     }
   }, [user, selectedCategory]);
 
-  const fetchProductsByCategory = async (categoryValue) => {
+  const fetchCategoryProducts = async (categoryValue) => {
+    setProductsLoading(true);
     try {
-      setLoading(true);
-      setError(null);
-      const response = await fetch(`${API_URL}/products?category=${categoryValue}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch products');
+      const response = await fetch(`http://localhost:5000/api/products?category=${categoryValue}`);
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data);
       }
-      const data = await response.json();
-      setProducts(data);
-      
-      // Initialize quantities
-      const initialQuantities = {};
-      data.forEach(product => {
-        initialQuantities[product._id] = 1;
-      });
-      setQuantities(initialQuantities);
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setError('Failed to load products. Please try again later.');
+      console.error('Error fetching category products:', error);
     } finally {
-      setLoading(false);
+      setProductsLoading(false);
     }
   };
 
   const fetchWishlistStatus = async () => {
+    if (!user) return;
     try {
-      const response = await fetch(`${API_URL}/wishlist`, {
+      const response = await fetch('http://localhost:5000/api/wishlist', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -348,18 +337,17 @@ const Categories = () => {
     }
     
     try {
-      const method = wishlistedProducts.has(productId) ? 'DELETE' : 'POST';
-      const response = await fetch(`${API_URL}/wishlist/${productId}`, {
-        method,
+      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+        method: wishlistedProducts.has(productId) ? 'DELETE' : 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (response.ok) {
         setWishlistedProducts(prev => {
           const newSet = new Set(prev);
-          if (method === 'DELETE') {
+          if (wishlistedProducts.has(productId)) {
             newSet.delete(productId);
           } else {
             newSet.add(productId);
@@ -368,7 +356,7 @@ const Categories = () => {
         });
       }
     } catch (error) {
-      console.error('Error updating wishlist:', error);
+      console.error('Error toggling wishlist:', error);
     }
   };
 

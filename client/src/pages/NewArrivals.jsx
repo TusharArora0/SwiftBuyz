@@ -38,7 +38,6 @@ import { formatPrice } from '../utils/formatPrice';
 import { PLACEHOLDER_IMAGE } from '../utils/placeholderImage';
 import { styled } from '@mui/material/styles';
 import { fadeIn, fadeInUp, pulse, getFadeInUpStaggered, shimmer } from '../utils/animations';
-import { API_URL, fetchWithAuth } from '../utils/apiConfig';
 
 // Styled Components
 const NewArrivalCard = styled(Card)(({ theme }) => ({
@@ -164,7 +163,6 @@ const NewArrivals = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [wishlistedProducts, setWishlistedProducts] = useState(new Set());
-  const [quantities, setQuantities] = useState({});
 
   useEffect(() => {
     fetchNewArrivals();
@@ -177,19 +175,12 @@ const NewArrivals = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_URL}/products/new-arrivals`);
+      const response = await fetch('http://localhost:5000/api/products/new-arrivals');
       if (!response.ok) {
         throw new Error('Failed to fetch new arrivals');
       }
       const data = await response.json();
       setNewArrivals(data);
-      
-      // Initialize quantities
-      const initialQuantities = {};
-      data.forEach(product => {
-        initialQuantities[product._id] = 1;
-      });
-      setQuantities(initialQuantities);
     } catch (error) {
       console.error('Error fetching new arrivals:', error);
       setError('Failed to load new arrivals. Please try again later.');
@@ -200,7 +191,7 @@ const NewArrivals = () => {
 
   const fetchWishlistStatus = async () => {
     try {
-      const response = await fetch(`${API_URL}/wishlist`, {
+      const response = await fetch('http://localhost:5000/api/wishlist', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -223,16 +214,16 @@ const NewArrivals = () => {
       navigate('/login');
       return;
     }
-    
+
     try {
       const method = wishlistedProducts.has(productId) ? 'DELETE' : 'POST';
-      const response = await fetch(`${API_URL}/wishlist/${productId}`, {
+      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
         method,
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (response.ok) {
         setWishlistedProducts(prev => {
           const newSet = new Set(prev);
@@ -245,7 +236,7 @@ const NewArrivals = () => {
         });
       }
     } catch (error) {
-      console.error('Error updating wishlist:', error);
+      console.error('Error toggling wishlist:', error);
     }
   };
 

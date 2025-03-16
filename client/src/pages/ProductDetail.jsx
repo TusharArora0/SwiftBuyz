@@ -51,7 +51,7 @@ import {
 import { addToCart } from '../store/slices/cartSlice';
 import { formatPrice } from '../utils/formatPrice';
 import { PLACEHOLDER_IMAGE } from '../utils/placeholderImage';
-import { API_URL, fetchWithAuth } from '../utils/apiConfig';
+import { fetchWithAuth } from '../utils/api';
 
 // TabPanel component for the tabbed interface
 function TabPanel(props) {
@@ -108,10 +108,10 @@ const ProductDetail = () => {
       if (!user) return;
 
       try {
-        const response = await fetchWithAuth(`${API_URL}/wishlist/check/${id}`);
+        const response = await fetchWithAuth(`http://localhost:5000/api/wishlist/check/${id}`);
         if (response.ok) {
-          const data = await response.json();
-          setIsWishlisted(data.isWishlisted);
+          const { isWishlisted } = await response.json();
+          setIsWishlisted(isWishlisted);
         }
       } catch (error) {
         console.error('Error checking wishlist status:', error);
@@ -126,44 +126,15 @@ const ProductDetail = () => {
   const fetchProductDetails = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/products/${id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch product details');
-      }
+      const response = await fetch(`http://localhost:5000/api/products/${id}`);
+      if (!response.ok) throw new Error('Product not found');
       const data = await response.json();
       setProduct(data);
-      
-      // Set initial selected image
-      if (data.images && data.images.length > 0) {
-        setSelectedImage(data.images[0]);
-      }
-      
-      // Set initial quantity
-      setQuantity(1);
-      
-      // Fetch reviews
-      fetchReviews();
+      setSelectedImage(0);
     } catch (error) {
-      console.error('Error fetching product details:', error);
-      setError('Failed to load product details. Please try again later.');
+      setError(error.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchReviews = async () => {
-    try {
-      const response = await fetch(`${API_URL}/products/${id}/reviews`, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setReviews(data);
-      }
-    } catch (error) {
-      console.error('Error fetching reviews:', error);
     }
   };
 
@@ -220,7 +191,7 @@ const ProductDetail = () => {
 
   const handleAddReview = async () => {
     try {
-      const response = await fetch(`${API_URL}/products/${id}/reviews`, {
+      const response = await fetch(`http://localhost:5000/api/products/${id}/reviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -249,7 +220,7 @@ const ProductDetail = () => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/wishlist/${id}`, {
+      const response = await fetch(`http://localhost:5000/api/wishlist/${id}`, {
         method: isWishlisted ? 'DELETE' : 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,

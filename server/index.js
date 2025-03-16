@@ -45,36 +45,14 @@ app.use((req, res, next) => {
 });
 
 // MongoDB connection
-let isConnected = false;
-
-const connectToDatabase = async () => {
-  if (isConnected) {
-    console.log('Using existing MongoDB connection');
-    return;
-  }
-
-  try {
-    const options = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000
-    };
-
-    await mongoose.connect(process.env.MONGODB_URI, options);
-    isConnected = true;
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => {
     console.log('Successfully connected to MongoDB Atlas');
-  } catch (error) {
+  })
+  .catch((error) => {
     console.error('MongoDB connection error:', error.message);
-    isConnected = false;
-    // Don't throw error, let the request continue
-  }
-};
-
-// Connect to MongoDB before handling requests
-app.use(async (req, res, next) => {
-  await connectToDatabase();
-  next();
-});
+    process.exit(1);
+  });
 
 // Mount routes
 app.use('/api/auth', authRoutes);
@@ -82,30 +60,6 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/wishlist', wishlistRoutes);
-
-// Health check route
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'Server is running' });
-});
-
-// Add a simple test route
-app.get('/api/test-mongo', async (req, res) => {
-  try {
-    // Check MongoDB connection
-    const isConnected = mongoose.connection.readyState === 1;
-    
-    res.status(200).json({
-      message: 'API test route is working!',
-      mongoConnected: isConnected,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: 'Error in test route',
-      error: error.message
-    });
-  }
-});
 
 // Print registered routes
 console.log('Mounted routes:');
@@ -117,12 +71,7 @@ app._router.stack.forEach((middleware) => {
     // Router middleware
     middleware.handle.stack.forEach((handler) => {
       if (handler.route) {
-        const prefix = middleware.regexp.toString().includes('auth') ? '/api/auth' : 
-                      middleware.regexp.toString().includes('products') ? '/api/products' :
-                      middleware.regexp.toString().includes('orders') ? '/api/orders' :
-                      middleware.regexp.toString().includes('admin') ? '/api/admin' :
-                      middleware.regexp.toString().includes('wishlist') ? '/api/wishlist' : '';
-        console.log(`${Object.keys(handler.route.methods)} ${prefix}${handler.route.path}`);
+        console.log(`${Object.keys(handler.route.methods)} /api/auth${handler.route.path}`);
       }
     });
   }
@@ -143,14 +92,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server if not running on Vercel
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Test the auth routes at http://localhost:${PORT}/api/auth/test`);
-  });
-}
-
-// Export the Express app for Vercel
-export default app; 
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Test the auth routes at http://localhost:${PORT}/api/auth/test`);
+}); 

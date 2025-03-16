@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateUser } from '../../store/slices/authSlice';
-import { API_URL, fetchWithAuth } from '../../utils/apiConfig';
 
 const ProfileSettings = () => {
   const { user, token } = useSelector((state) => state.auth);
@@ -55,7 +54,7 @@ const ProfileSettings = () => {
         }
       }
 
-      const response = await fetch(`${API_URL}/users/profile`, {
+      const response = await fetch('http://localhost:5000/api/users/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

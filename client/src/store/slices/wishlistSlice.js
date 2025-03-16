@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { API_URL, fetchWithAuth } from '../../utils/apiConfig';
 
 // Async thunk to fetch wishlist items
 export const fetchWishlistItems = createAsyncThunk(
@@ -8,7 +9,7 @@ export const fetchWishlistItems = createAsyncThunk(
       const token = localStorage.getItem('token');
       if (!token) return [];
       
-      const response = await fetch('http://localhost:5000/api/wishlist', {
+      const response = await fetch(`${API_URL}/wishlist`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -32,21 +33,21 @@ export const addToWishlist = createAsyncThunk(
   async (productId, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) throw new Error('Not authenticated');
+      if (!token) throw new Error('Authentication required');
       
-      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+      const response = await fetch(`${API_URL}/wishlist/${productId}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${token}`
         }
       });
       
       if (!response.ok) {
-        throw new Error('Failed to add to wishlist');
+        throw new Error('Failed to add item to wishlist');
       }
       
-      return productId;
+      const data = await response.json();
+      return data;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -59,9 +60,9 @@ export const removeFromWishlist = createAsyncThunk(
   async (productId, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) throw new Error('Not authenticated');
+      if (!token) throw new Error('Authentication required');
       
-      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+      const response = await fetch(`${API_URL}/wishlist/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -69,7 +70,7 @@ export const removeFromWishlist = createAsyncThunk(
       });
       
       if (!response.ok) {
-        throw new Error('Failed to remove from wishlist');
+        throw new Error('Failed to remove item from wishlist');
       }
       
       return productId;

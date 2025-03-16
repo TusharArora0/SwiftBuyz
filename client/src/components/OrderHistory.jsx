@@ -44,7 +44,7 @@ const OrderHistory = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/orders/user', {
+      const response = await fetch('https://swiftbuyz-five.vercel.app/api/orders/user', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -67,7 +67,7 @@ const OrderHistory = () => {
 
   const handleCancelOrder = async (orderId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}/cancel`, {
+      const response = await fetch(`https://swiftbuyz-five.vercel.app/api/orders/${orderId}/cancel`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

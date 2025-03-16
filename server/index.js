@@ -21,7 +21,16 @@ console.log('- MONGODB_URI exists:', !!process.env.MONGODB_URI);
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://swift-buyz.vercel.app',
+    'https://swift-buyz-27h7lc2ht-tushararora0s-projects.vercel.app',
+    'https://swiftbuyz-five.vercel.app',
+    'https://swiftbuyz-1belqlz6y-tushararora0s-projects.vercel.app',
+    'http://localhost:3000'
+  ],
+  credentials: true
+}));
 app.use(express.json());
 app.use(morgan('dev'));
 

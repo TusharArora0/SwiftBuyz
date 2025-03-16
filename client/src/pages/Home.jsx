@@ -138,12 +138,12 @@ const Home = () => {
   const fetchProducts = async () => {
     try {
       // Fetch flash sale products
-      const flashResponse = await fetch('http://localhost:5000/api/products/deals');
+      const flashResponse = await fetch('https://swiftbuyz-five.vercel.app/api/products/deals');
       const flashData = await flashResponse.json();
       setFlashSaleProducts(flashData);
 
       // Fetch trending products
-      const trendingResponse = await fetch('http://localhost:5000/api/products?sort=rating');
+      const trendingResponse = await fetch('https://swiftbuyz-five.vercel.app/api/products?sort=rating');
       const trendingData = await trendingResponse.json();
       setTrendingProducts(trendingData.slice(0, 6)); // Get top 6 products
 

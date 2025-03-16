@@ -33,6 +33,7 @@ import {
   Person as PersonIcon,
 } from '@mui/icons-material';
 import { loginStart, loginSuccess, loginFailure } from '../store/slices/authSlice';
+import { API_URL, fetchWithAuth } from '../utils/apiConfig';
 
 const Login = () => {
   const theme = useTheme();
@@ -68,15 +69,19 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(loginStart());
+    setLoading(true);
+    setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
       });
 
       const data = await response.json();
@@ -85,21 +90,21 @@ const Login = () => {
         throw new Error(data.message || 'Login failed');
       }
 
-      dispatch(loginSuccess(data));
+      // Store token in localStorage
+      localStorage.setItem('token', data.token);
       
-      // Redirect based on user type
-      switch (data.user.profileType) {
-        case 'admin':
-          navigate('/admin');
-          break;
-        case 'seller':
-          navigate('/profile');
-          break;
-        default:
-          navigate('/');
-      }
+      // Dispatch login action
+      dispatch(login({
+        token: data.token,
+        user: data.user
+      }));
+
+      navigate('/');
     } catch (error) {
-      dispatch(loginFailure(error.message));
+      console.error('Login error:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -129,7 +134,7 @@ const Login = () => {
     setResetError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
+      const response = await fetch(`${API_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -168,7 +173,7 @@ const Login = () => {
     setResetError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/verify-reset-code', {
+      const response = await fetch(`${API_URL}/auth/verify-reset-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -193,7 +198,7 @@ const Login = () => {
 
   const handleResetPassword = async () => {
     if (!newPassword || !confirmPassword) {
-      setResetError('Please enter and confirm your new password');
+      setResetError('Please fill in all fields');
       return;
     }
 
@@ -202,16 +207,11 @@ const Login = () => {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setResetError('Password must be at least 6 characters long');
-      return;
-    }
-
     setResetLoading(true);
     setResetError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/reset-password', {
+      const response = await fetch(`${API_URL}/auth/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -219,7 +219,7 @@ const Login = () => {
         body: JSON.stringify({
           email: resetEmail,
           code: resetCode,
-          newPassword,
+          newPassword
         }),
       });
 
@@ -229,10 +229,15 @@ const Login = () => {
         throw new Error(data.message || 'Failed to reset password');
       }
 
-      setResetSuccess('Password reset successfully. You can now login with your new password.');
-      setTimeout(() => {
-        handleForgotPasswordClose();
-      }, 3000);
+      setResetSuccess('Password reset successfully');
+      setResetModalOpen(false);
+      
+      // Clear form
+      setResetEmail('');
+      setResetCode('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setResetStep(1);
     } catch (error) {
       setResetError(error.message);
     } finally {

@@ -57,6 +57,7 @@ import {
   getFadeInUpStaggered,
   shimmer,
 } from '../utils/animations';
+import { API_URL, fetchWithAuth } from '../utils/apiConfig';
 
 // Styled components
 const ProductCard = styled(Card)(({ theme }) => ({
@@ -221,7 +222,7 @@ const Products = () => {
       const searchQuery = searchParams.get('search');
       const categoryParam = searchParams.get('category');
       
-      let url = 'http://localhost:5000/api/products';
+      let url = `${API_URL}/products`;
       const queryParams = new URLSearchParams();
       
       if (searchQuery) {
@@ -251,7 +252,7 @@ const Products = () => {
   const fetchWishlistStatus = async () => {
     if (!user) return;
     try {
-      const response = await fetch('http://localhost:5000/api/wishlist', {
+      const response = await fetch(`${API_URL}/wishlist`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -296,7 +297,7 @@ const Products = () => {
     }
     
     try {
-      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+      const response = await fetch(`${API_URL}/wishlist/${productId}`, {
         method: wishlistedProducts.has(productId) ? 'DELETE' : 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

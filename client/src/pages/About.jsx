@@ -123,7 +123,7 @@ const About = () => {
     const fetchStats = async () => {
       try {
         // Only fetch products data since other endpoints require authentication
-        const productsResponse = await fetch('http://localhost:5000/api/products');
+        const productsResponse = await fetch('https://swiftbuyz-five.vercel.app/api/products');
         if (productsResponse.ok) {
           const products = await productsResponse.json();
           

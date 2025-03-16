@@ -44,6 +44,7 @@ import { formatPrice } from '../utils/formatPrice';
 import { PLACEHOLDER_IMAGE } from '../utils/placeholderImage';
 import { styled } from '@mui/material/styles';
 import { fadeIn, fadeInUp, pulse, getFadeInUpStaggered, shimmer } from '../utils/animations';
+import { API_URL, fetchWithAuth } from '../utils/apiConfig';
 
 // Styled Components
 const DealCard = styled(Card)(({ theme }) => ({
@@ -233,7 +234,7 @@ const Deals = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('http://localhost:5000/api/products/deals');
+      const response = await fetch(`${API_URL}/products/deals`);
       if (!response.ok) {
         throw new Error('Failed to fetch deals');
       }
@@ -257,7 +258,7 @@ const Deals = () => {
 
   const fetchWishlistStatus = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/wishlist', {
+      const response = await fetch(`${API_URL}/wishlist`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -291,7 +292,7 @@ const Deals = () => {
 
     try {
       const method = wishlistedProducts.has(productId) ? 'DELETE' : 'POST';
-      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+      const response = await fetch(`${API_URL}/wishlist/${productId}`, {
         method,
         headers: {
           'Authorization': `Bearer ${token}`

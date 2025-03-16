@@ -16,7 +16,9 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.5.0",
     "morgan": "^1.10.0",
-    "nodemailer": "^6.10.0"
+    "nodemailer": "^6.10.0",
+    "webidl-conversions": "^7.0.0",
+    "whatwg-url": "^11.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

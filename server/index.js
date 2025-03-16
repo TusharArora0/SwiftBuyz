@@ -51,7 +51,8 @@ mongoose.connect(process.env.MONGODB_URI)
   })
   .catch((error) => {
     console.error('MongoDB connection error:', error.message);
-    process.exit(1);
+    // Don't exit process on Vercel
+    console.error('Continuing despite MongoDB connection error');
   });
 
 // Mount routes
@@ -60,6 +61,11 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/wishlist', wishlistRoutes);
+
+// Health check route
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Server is running' });
+});
 
 // Print registered routes
 console.log('Mounted routes:');
@@ -71,7 +77,12 @@ app._router.stack.forEach((middleware) => {
     // Router middleware
     middleware.handle.stack.forEach((handler) => {
       if (handler.route) {
-        console.log(`${Object.keys(handler.route.methods)} /api/auth${handler.route.path}`);
+        const prefix = middleware.regexp.toString().includes('auth') ? '/api/auth' : 
+                      middleware.regexp.toString().includes('products') ? '/api/products' :
+                      middleware.regexp.toString().includes('orders') ? '/api/orders' :
+                      middleware.regexp.toString().includes('admin') ? '/api/admin' :
+                      middleware.regexp.toString().includes('wishlist') ? '/api/wishlist' : '';
+        console.log(`${Object.keys(handler.route.methods)} ${prefix}${handler.route.path}`);
       }
     });
   }
@@ -92,8 +103,14 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Test the auth routes at http://localhost:${PORT}/api/auth/test`);
-}); 
+// Start server if not running on Vercel
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Test the auth routes at http://localhost:${PORT}/api/auth/test`);
+  });
+}
+
+// Export the Express app for Vercel
+export default app; 

@@ -44,6 +44,7 @@ import { clearCart } from '../store/slices/cartSlice';
 import { formatPrice } from '../utils/formatPrice';
 import { PLACEHOLDER_IMAGE } from '../utils/placeholderImage';
 import OrderSuccessAnimation from '../components/OrderSuccessAnimation';
+import { API_URL, fetchWithAuth } from '../utils/apiConfig';
 
 const steps = [
   { label: 'Shipping Address', icon: <ShippingIcon /> },
@@ -188,7 +189,7 @@ const Checkout = () => {
         throw new Error('Authentication token is missing. Please log in again.');
       }
 
-      const response = await fetch('http://localhost:5000/api/orders', {
+      const response = await fetch(`${API_URL}/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

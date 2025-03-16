@@ -22,6 +22,7 @@ import {
 import { addToCart } from '../store/slices/cartSlice';
 import { formatPrice } from '../utils/formatPrice';
 import { PLACEHOLDER_IMAGE } from '../utils/placeholderImage';
+import { API_URL, fetchWithAuth } from '../utils/apiConfig';
 
 const Wishlist = () => {
   const navigate = useNavigate();
@@ -29,6 +30,9 @@ const Wishlist = () => {
   const { user, token } = useSelector(state => state.auth);
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
     fetchWishlist();
@@ -36,41 +40,53 @@ const Wishlist = () => {
 
   const fetchWishlist = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/wishlist', {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/wishlist`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      if (response.ok) {
-        const data = await response.json();
-        setWishlistItems(data);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch wishlist');
       }
+      
+      const data = await response.json();
+      setWishlistItems(data);
     } catch (error) {
       console.error('Error fetching wishlist:', error);
+      setError('Failed to load wishlist. Please try again later.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRemoveFromWishlist = async (productId) => {
+  const removeFromWishlist = async (productId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+      const response = await fetch(`${API_URL}/wishlist/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
+      
       if (response.ok) {
-        setWishlistItems(items => items.filter(item => item._id !== productId));
+        // Remove item from state
+        setWishlistItems(prev => prev.filter(item => item._id !== productId));
+        // Show success message
+        setSnackbarMessage('Item removed from wishlist');
+        setSnackbarOpen(true);
       }
     } catch (error) {
       console.error('Error removing from wishlist:', error);
+      setSnackbarMessage('Failed to remove item from wishlist');
+      setSnackbarOpen(true);
     }
   };
 
   const handleAddToCart = (product) => {
     dispatch(addToCart({ ...product, quantity: 1 }));
-    handleRemoveFromWishlist(product._id);
+    removeFromWishlist(product._id);
   };
 
   if (loading) {
@@ -127,7 +143,7 @@ const Wishlist = () => {
                   </Button>
                   <IconButton
                     color="error"
-                    onClick={() => handleRemoveFromWishlist(item._id)}
+                    onClick={() => removeFromWishlist(item._id)}
                   >
                     <DeleteIcon />
                   </IconButton>

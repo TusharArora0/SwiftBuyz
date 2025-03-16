@@ -51,7 +51,7 @@ import {
 import { addToCart } from '../store/slices/cartSlice';
 import { formatPrice } from '../utils/formatPrice';
 import { PLACEHOLDER_IMAGE } from '../utils/placeholderImage';
-import { fetchWithAuth } from '../utils/api';
+import { API_URL, fetchWithAuth } from '../utils/apiConfig';
 
 // TabPanel component for the tabbed interface
 function TabPanel(props) {
@@ -108,7 +108,7 @@ const ProductDetail = () => {
       if (!user) return;
 
       try {
-        const response = await fetchWithAuth(`http://localhost:5000/api/wishlist/check/${id}`);
+        const response = await fetchWithAuth(`${API_URL}/wishlist/check/${id}`);
         if (response.ok) {
           const { isWishlisted } = await response.json();
           setIsWishlisted(isWishlisted);
@@ -126,7 +126,7 @@ const ProductDetail = () => {
   const fetchProductDetails = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/products/${id}`);
+      const response = await fetch(`${API_URL}/products/${id}`);
       if (!response.ok) throw new Error('Product not found');
       const data = await response.json();
       setProduct(data);
@@ -191,7 +191,7 @@ const ProductDetail = () => {
 
   const handleAddReview = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${id}/reviews`, {
+      const response = await fetch(`${API_URL}/products/${id}/reviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +220,7 @@ const ProductDetail = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/wishlist/${id}`, {
+      const response = await fetch(`${API_URL}/wishlist/${id}`, {
         method: isWishlisted ? 'DELETE' : 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,

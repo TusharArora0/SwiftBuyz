@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -14,12 +14,14 @@ import {
 } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateUser } from '../../store/slices/authSlice';
+import { API_URL, fetchWithAuth } from '../../utils/apiConfig';
 
 const ProfileSettings = () => {
   const { user, token } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [error, setError] = useState(null);
   
   const [formData, setFormData] = useState({
     name: user.name || '',
@@ -28,7 +30,8 @@ const ProfileSettings = () => {
     newPassword: '',
     confirmPassword: '',
     notifications: true,
-    emailUpdates: true
+    emailUpdates: true,
+    profileImage: user.profileImage || null
   });
 
   const handleChange = (e) => {
@@ -54,7 +57,7 @@ const ProfileSettings = () => {
         }
       }
 
-      const response = await fetch('http://localhost:5000/api/users/profile', {
+      const response = await fetch(`${API_URL}/users/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +69,8 @@ const ProfileSettings = () => {
           currentPassword: formData.currentPassword,
           newPassword: formData.newPassword,
           notifications: formData.notifications,
-          emailUpdates: formData.emailUpdates
+          emailUpdates: formData.emailUpdates,
+          profileImage: formData.profileImage
         })
       });
 
@@ -97,6 +101,38 @@ const ProfileSettings = () => {
         type: 'error',
         text: error.message
       });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserProfile = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/users/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+      
+      const data = await response.json();
+      
+      // Update form data with user profile
+      setFormData({
+        name: data.name || '',
+        email: data.email || '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+        profileImage: data.profileImage || null
+      });
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setError('Failed to load profile. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -221,7 +257,8 @@ const ProfileSettings = () => {
                   newPassword: '',
                   confirmPassword: '',
                   notifications: true,
-                  emailUpdates: true
+                  emailUpdates: true,
+                  profileImage: user.profileImage || null
                 })}
               >
                 Reset

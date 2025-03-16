@@ -76,6 +76,7 @@ import { PLACEHOLDER_IMAGE } from '../../utils/placeholderImage';
 import { isLightColor } from '../../utils/colorUtils';
 import { formatPrice } from '../../utils/formatPrice';
 import { useNavigate } from 'react-router-dom';
+import { API_URL, fetchWithAuth } from '../../utils/apiConfig';
 
 const ORDER_STATUS_OPTIONS = [
   { value: 'pending', label: 'Pending', color: '#FFA500' },  // Orange
@@ -153,7 +154,7 @@ const SellerProfile = () => {
       };
 
       // Fetch seller stats
-      const statsResponse = await fetch(`http://localhost:5000/api/products/seller/${user.id}/stats`, {
+      const statsResponse = await fetch(`${API_URL}/products/seller/${user.id}/stats`, {
         headers
       });
       
@@ -178,7 +179,7 @@ const SellerProfile = () => {
       }
 
       // Fetch products count
-      const productsResponse = await fetch(`http://localhost:5000/api/products/seller/${user.id}`, {
+      const productsResponse = await fetch(`${API_URL}/products/seller/${user.id}`, {
         headers
       });
       
@@ -193,7 +194,7 @@ const SellerProfile = () => {
       }
 
       // Fetch orders
-      const ordersResponse = await fetch(`http://localhost:5000/api/orders/seller/${user.id}`, {
+      const ordersResponse = await fetch(`${API_URL}/orders/seller/${user.id}`, {
         headers
       });
       
@@ -238,7 +239,7 @@ const SellerProfile = () => {
 
   const fetchSellerProducts = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/products/seller/${user.id}`, {
+      const response = await fetch(`${API_URL}/products/seller/${user.id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -259,7 +260,7 @@ const SellerProfile = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/orders/seller/${user._id}`, {
+      const response = await fetch(`${API_URL}/orders/seller/${user._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -332,7 +333,7 @@ const SellerProfile = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/products', {
+      const response = await fetch(`${API_URL}/products`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -391,7 +392,7 @@ const SellerProfile = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+      const response = await fetch(`${API_URL}/products/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -462,7 +463,7 @@ const SellerProfile = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/products/${productData._id}`, {
+      const response = await fetch(`${API_URL}/products/${productData._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -575,7 +576,7 @@ const SellerProfile = () => {
 
   const handleWishlistToggle = async (productId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${productId}/wishlist`, {
+      const response = await fetch(`${API_URL}/products/${productId}/wishlist`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -603,7 +604,7 @@ const SellerProfile = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
+      const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
         method: 'PATCH',
           headers: {
           'Content-Type': 'application/json',

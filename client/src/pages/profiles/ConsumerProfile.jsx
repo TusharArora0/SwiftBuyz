@@ -51,6 +51,7 @@ import OrderHistory from '../../components/OrderHistory';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { formatPrice } from '../../utils/formatPrice';
 import { PLACEHOLDER_IMAGE } from '../../utils/placeholderImage';
+import { API_URL, fetchWithAuth } from '../../utils/apiConfig';
 
 const ConsumerProfile = () => {
   const { user, token } = useSelector((state) => state.auth);
@@ -102,23 +103,23 @@ const ConsumerProfile = () => {
   }, [activeTab, token]);
 
   const fetchWishlist = async () => {
-    if (!token) return;
-    
-    setWishlistLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/wishlist', {
+      setWishlistLoading(true);
+      const response = await fetch(`${API_URL}/wishlist`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      if (response.ok) {
-        const data = await response.json();
-        setWishlist(data);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch wishlist');
       }
+      
+      const data = await response.json();
+      setWishlist(data);
     } catch (error) {
       console.error('Error fetching wishlist:', error);
-      setError('Failed to load wishlist items');
-      setTimeout(() => setError(null), 3000);
+      setError('Failed to load wishlist. Please try again later.');
     } finally {
       setWishlistLoading(false);
     }
@@ -126,15 +127,23 @@ const ConsumerProfile = () => {
 
   const handleRemoveFromWishlist = async (productId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+      const response = await fetch(`${API_URL}/wishlist/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      if (response.ok) {
-        setWishlist(items => items.filter(item => item._id !== productId));
+      
+      if (!response.ok) {
+        throw new Error('Failed to remove from wishlist');
       }
+      
+      // Remove item from state
+      setWishlist(prev => prev.filter(item => item._id !== productId));
+      
+      // Show success message
+      setSuccess('Item removed from wishlist');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       console.error('Error removing from wishlist:', error);
       setError('Failed to remove item from wishlist');
@@ -162,7 +171,7 @@ const ConsumerProfile = () => {
         await handleDeleteAddress(editingAddress, false);
       }
       
-      const response = await fetch('http://localhost:5000/api/users/address', {
+      const response = await fetch(`${API_URL}/users/address`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +229,7 @@ const ConsumerProfile = () => {
   const handleDeleteAddress = async (index, showFeedback = true) => {
     try {
       setAddressLoading(true);
-      const response = await fetch(`http://localhost:5000/api/users/address/${index}`, {
+      const response = await fetch(`${API_URL}/users/address/${index}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -276,7 +285,7 @@ const ConsumerProfile = () => {
 
   const handleEditSubmit = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/users/profile`, {
+      const response = await fetch(`${API_URL}/users/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -865,7 +874,6 @@ const ConsumerProfile = () => {
                 country: '',
                 isDefault: false,
               });
-              setEditingAddress(null);
               setError(null);
             }}
             variant="outlined"

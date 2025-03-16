@@ -54,6 +54,7 @@ import {
   Inventory as ProductsIcon,
 } from '@mui/icons-material';
 import { formatPrice } from '../../utils/formatPrice';
+import { API_URL, fetchWithAuth } from '../../utils/apiConfig';
 
 const AdminDashboard = () => {
   const { user } = useSelector((state) => state.auth);
@@ -78,6 +79,8 @@ const AdminDashboard = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -94,7 +97,7 @@ const AdminDashboard = () => {
       };
 
       // Fetch stats
-      const statsResponse = await fetch('http://localhost:5000/api/admin/stats', {
+      const statsResponse = await fetch(`${API_URL}/admin/stats`, {
         headers
       });
       if (!statsResponse.ok) {
@@ -105,7 +108,7 @@ const AdminDashboard = () => {
       setStats(statsData);
 
       // Fetch all users
-      const usersResponse = await fetch('http://localhost:5000/api/admin/users', {
+      const usersResponse = await fetch(`${API_URL}/admin/users`, {
         headers
       });
       if (!usersResponse.ok) {
@@ -121,7 +124,7 @@ const AdminDashboard = () => {
       }
 
       // Fetch all sellers
-      const sellersResponse = await fetch('http://localhost:5000/api/admin/sellers', {
+      const sellersResponse = await fetch(`${API_URL}/admin/sellers`, {
         headers
       });
       if (!sellersResponse.ok) {
@@ -137,7 +140,7 @@ const AdminDashboard = () => {
       }
 
       // Fetch all orders
-      const ordersResponse = await fetch('http://localhost:5000/api/admin/orders', {
+      const ordersResponse = await fetch(`${API_URL}/admin/orders`, {
         headers
       });
       if (!ordersResponse.ok) {
@@ -170,104 +173,110 @@ const AdminDashboard = () => {
     setActiveTab(newValue);
   };
 
-  const handleUserStatusChange = async (userId, isBlocked) => {
+  const handleToggleUserStatus = async (userId, isActive) => {
     try {
-      setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/status`, {
+      const response = await fetch(`${API_URL}/admin/users/${userId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ isBlocked })
+        body: JSON.stringify({ isActive: !isActive })
       });
 
-      if (response.ok) {
-        setSuccess(`User status updated successfully`);
-        // Refresh users data
-        fetchDashboardData();
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
-        setError(errorData.message || 'Failed to update user status');
+        throw new Error(errorData.message || 'Failed to update user status');
       }
+
+      // Update users list
+      setUsers(users.map(user => 
+        user._id === userId ? { ...user, isActive: !isActive } : user
+      ));
+
+      // Show success message
+      setSnackbarMessage(`User ${isActive ? 'deactivated' : 'activated'} successfully`);
+      setSnackbarOpen(true);
     } catch (error) {
-      console.error('Error updating user status:', error);
-      setError('Failed to update user status');
-    } finally {
-      setLoading(false);
+      console.error('Error toggling user status:', error);
+      setSnackbarMessage(error.message);
+      setSnackbarOpen(true);
     }
   };
 
-  const handleSellerApproval = async (sellerId, isApproved) => {
+  const handleApproveSeller = async (sellerId) => {
     try {
-      setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/sellers/${sellerId}/approve`, {
+      const response = await fetch(`${API_URL}/admin/sellers/${sellerId}/approve`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ isApproved })
+        }
       });
 
-      if (response.ok) {
-        setSuccess(`Seller ${isApproved ? 'approved' : 'unapproved'} successfully`);
-        // Refresh sellers data
-        fetchDashboardData();
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
-        setError(errorData.message || 'Failed to update seller status');
+        throw new Error(errorData.message || 'Failed to approve seller');
       }
+
+      // Update sellers list
+      setSellers(sellers.map(seller => 
+        seller._id === sellerId ? { ...seller, isApproved: true } : seller
+      ));
+
+      // Show success message
+      setSnackbarMessage('Seller approved successfully');
+      setSnackbarOpen(true);
     } catch (error) {
-      console.error('Error updating seller status:', error);
-      setError('Failed to update seller status');
-    } finally {
-      setLoading(false);
+      console.error('Error approving seller:', error);
+      setSnackbarMessage(error.message);
+      setSnackbarOpen(true);
     }
   };
 
-  const handleDeleteClick = (user) => {
-    setUserToDelete(user);
-    setDeleteDialogOpen(true);
-  };
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
 
-  const handleDeleteConfirm = async () => {
     try {
-      setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/users/${userToDelete._id}`, {
+      const response = await fetch(`${API_URL}/admin/users/${userToDelete._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
-      if (response.ok) {
-        // Remove user from both users and sellers lists
-        setUsers(users.filter(user => user._id !== userToDelete._id));
-        setSellers(sellers.filter(seller => seller._id !== userToDelete._id));
-        setSuccess(`User ${userToDelete.name} deleted successfully`);
-        setError('');
-        // Refresh dashboard data to update counts
-        fetchDashboardData();
-      } else {
-        const data = await response.json();
-        setError(data.message || 'Failed to delete user');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete user');
       }
-    } catch (error) {
-      setError('Failed to delete user');
-    } finally {
+
+      // Update users or sellers list based on user type
+      if (userToDelete.profileType === 'seller') {
+        setSellers(sellers.filter(seller => seller._id !== userToDelete._id));
+      } else {
+        setUsers(users.filter(user => user._id !== userToDelete._id));
+      }
+
+      // Close delete dialog
       setDeleteDialogOpen(false);
       setUserToDelete(null);
-      setLoading(false);
+
+      // Show success message
+      setSnackbarMessage('User deleted successfully');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      setSnackbarMessage(error.message);
+      setSnackbarOpen(true);
     }
   };
 
   const handleCloseSnackbar = () => {
-    setSuccess('');
-    setError('');
+    setSnackbarMessage('');
+    setSnackbarOpen(false);
   };
 
   const renderDashboardOverview = () => (
@@ -451,7 +460,7 @@ const AdminDashboard = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Switch
                         checked={!user.isBlocked}
-                        onChange={() => handleUserStatusChange(user._id, !user.isBlocked)}
+                        onChange={() => handleToggleUserStatus(user._id, !user.isBlocked)}
                         color="primary"
                         disabled={loading}
                       />
@@ -463,7 +472,7 @@ const AdminDashboard = () => {
                   <TableCell>
                     <IconButton 
                       color="error" 
-                      onClick={() => handleDeleteClick(user)}
+                      onClick={() => setUserToDelete(user)}
                       disabled={loading}
                     >
                       <DeleteIcon />
@@ -515,7 +524,7 @@ const AdminDashboard = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Switch
                         checked={seller.isApproved}
-                        onChange={() => handleSellerApproval(seller._id, !seller.isApproved)}
+                        onChange={() => handleApproveSeller(seller._id)}
                         color="primary"
                         disabled={loading}
                       />
@@ -527,7 +536,7 @@ const AdminDashboard = () => {
                   <TableCell>
                     <IconButton 
                       color="error" 
-                      onClick={() => handleDeleteClick(seller)}
+                      onClick={() => setUserToDelete(seller)}
                       disabled={loading}
                     >
                       <DeleteIcon />
@@ -689,7 +698,7 @@ const AdminDashboard = () => {
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
           <Button 
-            onClick={handleDeleteConfirm} 
+            onClick={handleDeleteUser} 
             color="error" 
             variant="contained"
             disabled={loading}
@@ -701,11 +710,14 @@ const AdminDashboard = () => {
 
       {/* Success Snackbar */}
       <Snackbar
-        open={!!success}
+        open={snackbarOpen}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        message={success}
-      />
+      >
+        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
 
       {/* Error Alert */}
       {error && (

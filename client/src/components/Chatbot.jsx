@@ -29,6 +29,7 @@ import {
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { API_URL, fetchWithAuth } from '../utils/apiConfig';
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -96,54 +97,23 @@ const Chatbot = () => {
   }, [isOpen]);
 
   const fetchChatHistory = async () => {
-    if (!isAuthenticated) return;
+    if (!user) return;
     
     try {
-      setIsTyping(true);
-      const response = await fetch('http://localhost:5000/api/chat/history', {
+      const response = await fetch(`${API_URL}/chat/history`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+          'Authorization': `Bearer ${token}`
+        }
       });
-
+      
       if (response.ok) {
         const data = await response.json();
         if (data.length > 0) {
-          // Convert history to chat format
-          const formattedMessages = [];
-          data.forEach(msg => {
-            formattedMessages.push({
-              type: 'user',
-              content: msg.message,
-              timestamp: new Date(msg.createdAt),
-            });
-            formattedMessages.push({
-              type: 'bot',
-              content: msg.response,
-              timestamp: new Date(msg.createdAt),
-            });
-          });
-          
-          // Only show last 10 messages to avoid cluttering
-          const recentMessages = formattedMessages.slice(-10);
-          setMessages(recentMessages);
-        } else {
-          // No history, show greeting
-          setMessages([
-            {
-              type: 'bot',
-              content: `Hi${user ? ` ${user.name}` : ''}! How can I help you today?`,
-              timestamp: new Date(),
-            },
-          ]);
-          // Show quick options after greeting
-          setShowOptions(true);
+          setMessages(data);
         }
       }
     } catch (error) {
       console.error('Error fetching chat history:', error);
-    } finally {
-      setIsTyping(false);
     }
   };
 
@@ -201,13 +171,13 @@ const Chatbot = () => {
 
     try {
       // Use different endpoints based on authentication status
-      const endpoint = isAuthenticated 
-        ? 'http://localhost:5000/api/chat/message' 
-        : 'http://localhost:5000/api/chat/public';
+      const endpoint = user 
+        ? `${API_URL}/chat/message`
+        : `${API_URL}/chat/public`;
       
       const headers = {
         'Content-Type': 'application/json',
-        ...(isAuthenticated && { 'Authorization': `Bearer ${token}` })
+        ...(user && { 'Authorization': `Bearer ${token}` })
       };
 
       const response = await fetch(endpoint, {
@@ -355,7 +325,7 @@ const Chatbot = () => {
               gap: 1,
             }}
           >
-            {!isAuthenticated && (
+            {!user && (
               <Alert 
                 severity="info" 
                 sx={{ mb: 2 }}

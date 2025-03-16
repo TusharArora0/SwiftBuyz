@@ -23,31 +23,40 @@ import {
 } from '@mui/icons-material';
 import { PLACEHOLDER_IMAGE } from '../../utils/placeholderImage';
 import { formatPrice } from '../../utils/formatPrice';
+import { API_URL, fetchWithAuth } from '../../utils/apiConfig';
 
 const SellerProducts = () => {
   const navigate = useNavigate();
   const { user, token } = useSelector((state) => state.auth);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    fetchSellerProducts();
+    fetchProducts();
   }, []);
 
-  const fetchSellerProducts = async () => {
+  const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/products/seller/${user.id}`, {
+      const response = await fetch(`${API_URL}/products/seller/${user.id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      if (response.ok) {
-        const data = await response.json();
-        setProducts(data);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
       }
+      
+      const data = await response.json();
+      setProducts(data);
     } catch (error) {
       console.error('Error fetching products:', error);
+      setError('Failed to load products. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -59,20 +68,28 @@ const SellerProducts = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+      setDeleting(true);
+      const response = await fetch(`${API_URL}/products/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-
-      if (response.ok) {
-        setProducts(products.filter(p => p._id !== productId));
-      } else {
-        alert('Error deleting product');
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete product');
       }
+      
+      setProducts(prev => prev.filter(product => product._id !== productId));
+      
+      setSnackbarMessage('Product deleted successfully');
+      setSnackbarOpen(true);
     } catch (error) {
       console.error('Error deleting product:', error);
+      setSnackbarMessage('Failed to delete product');
+      setSnackbarOpen(true);
+    } finally {
+      setDeleting(false);
     }
   };
 

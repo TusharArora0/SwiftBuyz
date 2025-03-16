@@ -33,7 +33,6 @@ const SellerProducts = () => {
   const [error, setError] = useState(null);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -48,12 +47,12 @@ const SellerProducts = () => {
         }
       });
       
-      if (!response.ok) {
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data);
+      } else {
         throw new Error('Failed to fetch products');
       }
-      
-      const data = await response.json();
-      setProducts(data);
     } catch (error) {
       console.error('Error fetching products:', error);
       setError('Failed to load products. Please try again later.');
@@ -68,7 +67,6 @@ const SellerProducts = () => {
     }
 
     try {
-      setDeleting(true);
       const response = await fetch(`${API_URL}/products/${productId}`, {
         method: 'DELETE',
         headers: {
@@ -76,20 +74,17 @@ const SellerProducts = () => {
         }
       });
       
-      if (!response.ok) {
+      if (response.ok) {
+        setProducts(products.filter(product => product._id !== productId));
+        setSnackbarMessage('Product deleted successfully');
+        setSnackbarOpen(true);
+      } else {
         throw new Error('Failed to delete product');
       }
-      
-      setProducts(prev => prev.filter(product => product._id !== productId));
-      
-      setSnackbarMessage('Product deleted successfully');
-      setSnackbarOpen(true);
     } catch (error) {
       console.error('Error deleting product:', error);
       setSnackbarMessage('Failed to delete product');
       setSnackbarOpen(true);
-    } finally {
-      setDeleting(false);
     }
   };
 

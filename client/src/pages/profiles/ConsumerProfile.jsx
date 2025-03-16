@@ -111,15 +111,12 @@ const ConsumerProfile = () => {
         }
       });
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch wishlist');
+      if (response.ok) {
+        const data = await response.json();
+        setWishlist(data);
       }
-      
-      const data = await response.json();
-      setWishlist(data);
     } catch (error) {
       console.error('Error fetching wishlist:', error);
-      setError('Failed to load wishlist. Please try again later.');
     } finally {
       setWishlistLoading(false);
     }
@@ -134,20 +131,12 @@ const ConsumerProfile = () => {
         }
       });
       
-      if (!response.ok) {
-        throw new Error('Failed to remove from wishlist');
+      if (response.ok) {
+        // Remove the item from the wishlist
+        setWishlist(wishlist.filter(item => item._id !== productId));
       }
-      
-      // Remove item from state
-      setWishlist(prev => prev.filter(item => item._id !== productId));
-      
-      // Show success message
-      setSuccess('Item removed from wishlist');
-      setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       console.error('Error removing from wishlist:', error);
-      setError('Failed to remove item from wishlist');
-      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -874,6 +863,7 @@ const ConsumerProfile = () => {
                 country: '',
                 isDefault: false,
               });
+              setEditingAddress(null);
               setError(null);
             }}
             variant="outlined"

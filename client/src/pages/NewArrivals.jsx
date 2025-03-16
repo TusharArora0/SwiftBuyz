@@ -164,6 +164,7 @@ const NewArrivals = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [wishlistedProducts, setWishlistedProducts] = useState(new Set());
+  const [quantities, setQuantities] = useState({});
 
   useEffect(() => {
     fetchNewArrivals();
@@ -182,8 +183,8 @@ const NewArrivals = () => {
       }
       const data = await response.json();
       setNewArrivals(data);
-      setFilteredArrivals(data);
       
+      // Initialize quantities
       const initialQuantities = {};
       data.forEach(product => {
         initialQuantities[product._id] = 1;

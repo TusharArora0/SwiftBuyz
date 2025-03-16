@@ -108,9 +108,7 @@ const Chatbot = () => {
       
       if (response.ok) {
         const data = await response.json();
-        if (data.length > 0) {
-          setMessages(data);
-        }
+        setMessages(data);
       }
     } catch (error) {
       console.error('Error fetching chat history:', error);
@@ -170,20 +168,17 @@ const Chatbot = () => {
     setShowFollowUp(false); // Hide any existing follow-up questions
 
     try {
-      // Use different endpoints based on authentication status
       const endpoint = user 
         ? `${API_URL}/chat/message`
         : `${API_URL}/chat/public`;
       
-      const headers = {
-        'Content-Type': 'application/json',
-        ...(user && { 'Authorization': `Bearer ${token}` })
-      };
-
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers,
-        body: JSON.stringify({ message: userMessage.content }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(user && { 'Authorization': `Bearer ${token}` })
+        },
+        body: JSON.stringify({ message: userMessage.content })
       });
 
       if (response.ok) {
@@ -325,7 +320,7 @@ const Chatbot = () => {
               gap: 1,
             }}
           >
-            {!user && (
+            {!isAuthenticated && (
               <Alert 
                 severity="info" 
                 sx={{ mb: 2 }}

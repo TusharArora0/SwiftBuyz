@@ -282,7 +282,6 @@ const Categories = () => {
       }
       const data = await response.json();
       setProducts(data);
-      setFilteredProducts(data);
       
       // Initialize quantities
       const initialQuantities = {};

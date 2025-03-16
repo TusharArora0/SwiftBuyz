@@ -110,8 +110,8 @@ const ProductDetail = () => {
       try {
         const response = await fetchWithAuth(`${API_URL}/wishlist/check/${id}`);
         if (response.ok) {
-          const { isWishlisted } = await response.json();
-          setIsWishlisted(isWishlisted);
+          const data = await response.json();
+          setIsWishlisted(data.isWishlisted);
         }
       } catch (error) {
         console.error('Error checking wishlist status:', error);
@@ -127,14 +127,43 @@ const ProductDetail = () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_URL}/products/${id}`);
-      if (!response.ok) throw new Error('Product not found');
+      if (!response.ok) {
+        throw new Error('Failed to fetch product details');
+      }
       const data = await response.json();
       setProduct(data);
-      setSelectedImage(0);
+      
+      // Set initial selected image
+      if (data.images && data.images.length > 0) {
+        setSelectedImage(data.images[0]);
+      }
+      
+      // Set initial quantity
+      setQuantity(1);
+      
+      // Fetch reviews
+      fetchReviews();
     } catch (error) {
-      setError(error.message);
+      console.error('Error fetching product details:', error);
+      setError('Failed to load product details. Please try again later.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchReviews = async () => {
+    try {
+      const response = await fetch(`${API_URL}/products/${id}/reviews`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setReviews(data);
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
     }
   };
 

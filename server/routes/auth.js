@@ -233,6 +233,14 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
+// Test endpoint to check API connectivity
+router.get('/test', (req, res) => {
+  return res.status(200).json({
+    message: 'API is working correctly',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Test register endpoint
 router.post('/test-register', (req, res) => {
   return res.status(200).json({

@@ -58,11 +58,9 @@ const Login = () => {
     dispatch(loginStart());
 
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      // Use the fetchWithAuth utility which has fallback capability
+      const response = await fetchWithAuth('auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
@@ -92,8 +90,15 @@ const Login = () => {
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
-      dispatch(loginFailure(error.message));
-      setError(error.message);
+      
+      // Provide a more user-friendly error message
+      let errorMessage = error.message;
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
+      }
+      
+      dispatch(loginFailure(errorMessage));
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

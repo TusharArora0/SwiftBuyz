@@ -45,15 +45,36 @@ app.use((req, res, next) => {
 });
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => {
+let isConnected = false;
+
+const connectToDatabase = async () => {
+  if (isConnected) {
+    console.log('Using existing MongoDB connection');
+    return;
+  }
+
+  try {
+    const options = {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000
+    };
+
+    await mongoose.connect(process.env.MONGODB_URI, options);
+    isConnected = true;
     console.log('Successfully connected to MongoDB Atlas');
-  })
-  .catch((error) => {
+  } catch (error) {
     console.error('MongoDB connection error:', error.message);
-    // Don't exit process on Vercel
-    console.error('Continuing despite MongoDB connection error');
-  });
+    isConnected = false;
+    // Don't throw error, let the request continue
+  }
+};
+
+// Connect to MongoDB before handling requests
+app.use(async (req, res, next) => {
+  await connectToDatabase();
+  next();
+});
 
 // Mount routes
 app.use('/api/auth', authRoutes);
@@ -65,6 +86,25 @@ app.use('/api/wishlist', wishlistRoutes);
 // Health check route
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is running' });
+});
+
+// Add a simple test route
+app.get('/api/test-mongo', async (req, res) => {
+  try {
+    // Check MongoDB connection
+    const isConnected = mongoose.connection.readyState === 1;
+    
+    res.status(200).json({
+      message: 'API test route is working!',
+      mongoConnected: isConnected,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error in test route',
+      error: error.message
+    });
+  }
 });
 
 // Print registered routes

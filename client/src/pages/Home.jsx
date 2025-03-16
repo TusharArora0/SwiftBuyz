@@ -139,11 +139,25 @@ const Home = () => {
     try {
       // Fetch flash sale products
       const flashResponse = await fetch('https://swiftbuyz-five.vercel.app/api/products/deals');
+      
+      // Check if response is OK
+      if (!flashResponse.ok) {
+        const errorText = await flashResponse.text();
+        throw new Error(`Failed to fetch deals: ${errorText.substring(0, 100)}...`);
+      }
+      
       const flashData = await flashResponse.json();
       setFlashSaleProducts(flashData);
 
       // Fetch trending products
       const trendingResponse = await fetch('https://swiftbuyz-five.vercel.app/api/products?sort=rating');
+      
+      // Check if response is OK
+      if (!trendingResponse.ok) {
+        const errorText = await trendingResponse.text();
+        throw new Error(`Failed to fetch trending products: ${errorText.substring(0, 100)}...`);
+      }
+      
       const trendingData = await trendingResponse.json();
       setTrendingProducts(trendingData.slice(0, 6)); // Get top 6 products
 

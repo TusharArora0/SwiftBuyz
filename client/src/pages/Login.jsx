@@ -11,6 +11,7 @@ import {
   Alert,
   CircularProgress,
   InputAdornment,
+  IconButton,
   Grid,
   Paper,
   Divider,
@@ -27,6 +28,7 @@ import {
 } from '@mui/icons-material';
 import { loginStart, loginSuccess, loginFailure } from '../store/slices/authSlice';
 import { API_URL, fetchWithAuth } from '../utils/apiConfig';
+import ApiTest from '../components/ApiTest';
 
 const Login = () => {
   const theme = useTheme();
@@ -53,6 +55,7 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    dispatch(loginStart());
 
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
@@ -66,17 +69,22 @@ const Login = () => {
         }),
       });
 
-      const data = await response.json();
+      // Try to parse the response as JSON
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        // If JSON parsing fails, get the text response
+        const textResponse = await response.text();
+        throw new Error(`Server response is not valid JSON: ${textResponse.substring(0, 100)}...`);
+      }
 
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Store token in localStorage
-      localStorage.setItem('token', data.token);
-      
-      // Dispatch login action
-      dispatch(login({
+      // Dispatch login success action
+      dispatch(loginSuccess({
         token: data.token,
         user: data.user
       }));
@@ -84,6 +92,7 @@ const Login = () => {
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
+      dispatch(loginFailure(error.message));
       setError(error.message);
     } finally {
       setLoading(false);
@@ -222,6 +231,9 @@ const Login = () => {
           </Box>
         </Box>
       </Paper>
+      
+      {/* Add API Test component in development mode */}
+      {process.env.NODE_ENV === 'development' && <ApiTest />}
     </Container>
   );
 };

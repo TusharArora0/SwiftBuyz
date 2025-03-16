@@ -94,7 +94,7 @@ const AdminDashboard = () => {
       };
 
       // Fetch stats
-      const statsResponse = await fetch('http://localhost:5000/api/admin/stats', {
+      const statsResponse = await fetch('swiftbuyz-five.vercel.app/api/admin/stats', {
         headers
       });
       if (!statsResponse.ok) {
@@ -105,7 +105,7 @@ const AdminDashboard = () => {
       setStats(statsData);
 
       // Fetch all users
-      const usersResponse = await fetch('http://localhost:5000/api/admin/users', {
+      const usersResponse = await fetch('swiftbuyz-five.vercel.app/api/admin/users', {
         headers
       });
       if (!usersResponse.ok) {
@@ -121,7 +121,7 @@ const AdminDashboard = () => {
       }
 
       // Fetch all sellers
-      const sellersResponse = await fetch('http://localhost:5000/api/admin/sellers', {
+      const sellersResponse = await fetch('swiftbuyz-five.vercel.app/api/admin/sellers', {
         headers
       });
       if (!sellersResponse.ok) {
@@ -137,7 +137,7 @@ const AdminDashboard = () => {
       }
 
       // Fetch all orders
-      const ordersResponse = await fetch('http://localhost:5000/api/admin/orders', {
+      const ordersResponse = await fetch('swiftbuyz-five.vercel.app/api/admin/orders', {
         headers
       });
       if (!ordersResponse.ok) {
@@ -174,7 +174,7 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/status`, {
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/admin/users/${userId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -203,7 +203,7 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/sellers/${sellerId}/approve`, {
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/admin/sellers/${sellerId}/approve`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -237,7 +237,7 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/users/${userToDelete._id}`, {
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/admin/users/${userToDelete._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

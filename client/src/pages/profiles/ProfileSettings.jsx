@@ -54,7 +54,7 @@ const ProfileSettings = () => {
         }
       }
 
-      const response = await fetch('http://localhost:5000/api/users/profile', {
+      const response = await fetch('swiftbuyz-five.vercel.app/api/users/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

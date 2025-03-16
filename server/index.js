@@ -22,9 +22,14 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: '*', // Allow all origins
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  origin: [
+    'https://swift-buyz.vercel.app',
+    'https://swift-buyz-27h7lc2ht-tushararora0s-projects.vercel.app',
+    'https://swiftbuyz-five.vercel.app',
+    'https://swiftbuyz-1belqlz6y-tushararora0s-projects.vercel.app',
+    'http://localhost:3000'
+  ],
+  credentials: true
 }));
 app.use(express.json());
 app.use(morgan('dev'));
@@ -48,15 +53,6 @@ mongoose.connect(process.env.MONGODB_URI)
     console.error('MongoDB connection error:', error.message);
     process.exit(1);
   });
-
-// Add a simple test endpoint at the root level
-app.get('/test', (req, res) => {
-  res.json({
-    message: 'Server is working correctly',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
-  });
-});
 
 // Mount routes
 app.use('/api/auth', authRoutes);

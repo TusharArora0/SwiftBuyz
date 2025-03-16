@@ -29,6 +29,15 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  // Password reset fields
+  resetCode: {
+    type: String,
+    default: null
+  },
+  resetExpires: {
+    type: Date,
+    default: null
+  },
   // Additional fields for seller profile
   shopName: {
     type: String,

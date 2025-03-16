@@ -273,7 +273,7 @@ const Categories = () => {
   const fetchCategoryProducts = async (categoryValue) => {
     setProductsLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/products?category=${categoryValue}`);
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/products?category=${categoryValue}`);
       if (response.ok) {
         const data = await response.json();
         setProducts(data);
@@ -288,7 +288,7 @@ const Categories = () => {
   const fetchWishlistStatus = async () => {
     if (!user) return;
     try {
-      const response = await fetch('http://localhost:5000/api/wishlist', {
+      const response = await fetch('swiftbuyz-five.vercel.app/api/wishlist', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -337,7 +337,7 @@ const Categories = () => {
     }
     
     try {
-      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/wishlist/${productId}`, {
         method: wishlistedProducts.has(productId) ? 'DELETE' : 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

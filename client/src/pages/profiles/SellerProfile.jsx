@@ -153,7 +153,7 @@ const SellerProfile = () => {
       };
 
       // Fetch seller stats
-      const statsResponse = await fetch(`http://localhost:5000/api/products/seller/${user.id}/stats`, {
+      const statsResponse = await fetch(`swiftbuyz-five.vercel.app/api/products/seller/${user.id}/stats`, {
         headers
       });
       
@@ -178,7 +178,7 @@ const SellerProfile = () => {
       }
 
       // Fetch products count
-      const productsResponse = await fetch(`http://localhost:5000/api/products/seller/${user.id}`, {
+      const productsResponse = await fetch(`swiftbuyz-five.vercel.app/api/products/seller/${user.id}`, {
         headers
       });
       
@@ -193,7 +193,7 @@ const SellerProfile = () => {
       }
 
       // Fetch orders
-      const ordersResponse = await fetch(`http://localhost:5000/api/orders/seller/${user.id}`, {
+      const ordersResponse = await fetch(`swiftbuyz-five.vercel.app/api/orders/seller/${user.id}`, {
         headers
       });
       
@@ -238,7 +238,7 @@ const SellerProfile = () => {
 
   const fetchSellerProducts = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/products/seller/${user.id}`, {
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/products/seller/${user.id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -259,7 +259,7 @@ const SellerProfile = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/orders/seller/${user._id}`, {
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/orders/seller/${user._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -332,7 +332,7 @@ const SellerProfile = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/products', {
+      const response = await fetch('swiftbuyz-five.vercel.app/api/products', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -391,7 +391,7 @@ const SellerProfile = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/products/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -462,7 +462,7 @@ const SellerProfile = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/products/${productData._id}`, {
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/products/${productData._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -575,7 +575,7 @@ const SellerProfile = () => {
 
   const handleWishlistToggle = async (productId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${productId}/wishlist`, {
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/products/${productId}/wishlist`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -603,7 +603,7 @@ const SellerProfile = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/orders/${orderId}/status`, {
         method: 'PATCH',
           headers: {
           'Content-Type': 'application/json',

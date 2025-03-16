@@ -175,7 +175,7 @@ const NewArrivals = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('http://localhost:5000/api/products/new-arrivals');
+      const response = await fetch('swiftbuyz-five.vercel.app/api/products/new-arrivals');
       if (!response.ok) {
         throw new Error('Failed to fetch new arrivals');
       }
@@ -191,7 +191,7 @@ const NewArrivals = () => {
 
   const fetchWishlistStatus = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/wishlist', {
+      const response = await fetch('swiftbuyz-five.vercel.app/api/wishlist', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -217,7 +217,7 @@ const NewArrivals = () => {
 
     try {
       const method = wishlistedProducts.has(productId) ? 'DELETE' : 'POST';
-      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/wishlist/${productId}`, {
         method,
         headers: {
           'Authorization': `Bearer ${token}`

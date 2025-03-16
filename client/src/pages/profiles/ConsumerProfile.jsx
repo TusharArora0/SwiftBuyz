@@ -106,7 +106,7 @@ const ConsumerProfile = () => {
     
     setWishlistLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/wishlist', {
+      const response = await fetch('swiftbuyz-five.vercel.app/api/wishlist', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -126,7 +126,7 @@ const ConsumerProfile = () => {
 
   const handleRemoveFromWishlist = async (productId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/wishlist/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -162,7 +162,7 @@ const ConsumerProfile = () => {
         await handleDeleteAddress(editingAddress, false);
       }
       
-      const response = await fetch('http://localhost:5000/api/users/address', {
+      const response = await fetch('swiftbuyz-five.vercel.app/api/users/address', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +220,7 @@ const ConsumerProfile = () => {
   const handleDeleteAddress = async (index, showFeedback = true) => {
     try {
       setAddressLoading(true);
-      const response = await fetch(`http://localhost:5000/api/users/address/${index}`, {
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/users/address/${index}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -276,7 +276,7 @@ const ConsumerProfile = () => {
 
   const handleEditSubmit = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/users/profile`, {
+      const response = await fetch(`swiftbuyz-five.vercel.app/api/users/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

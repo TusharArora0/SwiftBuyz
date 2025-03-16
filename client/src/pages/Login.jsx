@@ -58,27 +58,53 @@ const Login = () => {
     dispatch(loginStart());
 
     try {
-      // Use the fetchWithAuth utility which has fallback capability
-      const response = await fetchWithAuth('auth/login', {
+      console.log('Attempting login with:', { email: formData.email, password: '******' });
+      
+      // Use direct fetch instead of fetchWithAuth to debug the issue
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
         }),
+        mode: 'cors',
+        cache: 'no-cache',
+        credentials: 'omit',
+        redirect: 'follow',
+        referrerPolicy: 'no-referrer'
       });
 
+      console.log('Login response status:', response.status);
+      
       // Try to parse the response as JSON
       let data;
+      let responseText;
+      
       try {
-        data = await response.json();
-      } catch (parseError) {
-        // If JSON parsing fails, get the text response
-        const textResponse = await response.text();
-        throw new Error(`Server response is not valid JSON: ${textResponse.substring(0, 100)}...`);
+        responseText = await response.text();
+        console.log('Raw response:', responseText);
+        
+        if (responseText) {
+          try {
+            data = JSON.parse(responseText);
+            console.log('Parsed response data:', data);
+          } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            throw new Error(`Server response is not valid JSON: ${responseText.substring(0, 100)}...`);
+          }
+        } else {
+          throw new Error('Empty response from server');
+        }
+      } catch (textError) {
+        console.error('Error reading response text:', textError);
+        throw new Error(`Failed to read server response: ${textError.message}`);
       }
 
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data?.message || `Login failed with status ${response.status}`);
       }
 
       // Dispatch login success action

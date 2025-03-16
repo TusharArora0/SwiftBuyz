@@ -20,10 +20,9 @@ export const testApiConnection = async () => {
       // Add these options to help with CORS and network issues
       mode: 'cors',
       cache: 'no-cache',
-      credentials: 'same-origin',
+      credentials: 'omit',
       redirect: 'follow',
-      referrerPolicy: 'no-referrer',
-      timeout: 5000 // 5 second timeout
+      referrerPolicy: 'no-referrer'
     });
     
     if (!response.ok) {
@@ -45,7 +44,8 @@ export const testApiConnection = async () => {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         mode: 'cors',
-        cache: 'no-cache'
+        cache: 'no-cache',
+        credentials: 'omit'
       });
       
       if (fallbackResponse.ok) {
@@ -87,7 +87,7 @@ export const fetchWithAuth = async (endpoint, options = {}) => {
       headers,
       mode: 'cors',
       cache: 'no-cache',
-      credentials: 'same-origin',
+      credentials: 'omit',
       redirect: 'follow',
       referrerPolicy: 'no-referrer'
     });
@@ -103,7 +103,8 @@ export const fetchWithAuth = async (endpoint, options = {}) => {
         ...options,
         headers,
         mode: 'cors',
-        cache: 'no-cache'
+        cache: 'no-cache',
+        credentials: 'omit'
       });
     }
     

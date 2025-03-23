@@ -1,5 +1,6 @@
 import { store } from '../store/store';
 import { logout } from '../store/slices/authSlice';
+import { API_URL } from './apiConfig';
 
 export const handleApiError = (error) => {
   if (error.response?.status === 401) {
@@ -16,9 +17,17 @@ export const fetchWithAuth = async (url, options = {}) => {
     throw new Error('No token found');
   }
 
-  const response = await fetch(url, {
+  // Ensure URL is properly formatted
+  const formattedUrl = url.startsWith('http') 
+    ? url 
+    : url.startsWith('/') 
+      ? `${API_URL}${url}`
+      : `${API_URL}/${url}`;
+
+  const response = await fetch(formattedUrl, {
     ...options,
     headers: {
+      'Content-Type': 'application/json',
       ...options.headers,
       'Authorization': `Bearer ${token}`,
     },

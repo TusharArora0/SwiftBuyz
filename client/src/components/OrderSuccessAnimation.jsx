@@ -15,14 +15,22 @@ const OrderSuccessAnimation = ({ open, onAnimationComplete }) => {
   
   useEffect(() => {
     if (open) {
+      console.log('OrderSuccessAnimation opened');
+      
       // Show loading spinner for 2 seconds, then show checkmark
       const timer = setTimeout(() => {
+        console.log('Showing checkmark');
         setShowCheckmark(true);
       }, 2000);
       
       // After showing checkmark for 1.5 seconds, trigger completion callback
       const completeTimer = setTimeout(() => {
-        onAnimationComplete();
+        console.log('Animation complete, calling onAnimationComplete');
+        if (onAnimationComplete && typeof onAnimationComplete === 'function') {
+          onAnimationComplete();
+        } else {
+          console.error('onAnimationComplete is not a valid function', onAnimationComplete);
+        }
       }, 3500);
       
       return () => {

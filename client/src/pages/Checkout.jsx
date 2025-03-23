@@ -257,6 +257,18 @@ const Checkout = () => {
       // Show success animation
       setLoading(false);
       setShowSuccessAnimation(true);
+      
+      // Backup: If animation doesn't trigger navigation, do it directly after 5 seconds
+      setTimeout(() => {
+        if (showSuccessAnimation) {
+          console.log('Animation callback not triggered, navigating directly to confirmation page');
+          setShowSuccessAnimation(false);
+          navigate('/order-confirmation', {
+            state: orderConfirmationData,
+            replace: true
+          });
+        }
+      }, 5000);
 
     } catch (err) {
       console.error('Order placement error:', err);
@@ -285,6 +297,9 @@ const Checkout = () => {
   const handleAnimationComplete = () => {
     setShowSuccessAnimation(false);
     
+    console.log('Animation completed, preparing to navigate to confirmation page');
+    console.log('Confirmation data:', confirmationData);
+    
     // Make sure we have confirmation data before navigating
     if (!confirmationData) {
       console.error('Missing confirmation data');
@@ -293,6 +308,7 @@ const Checkout = () => {
     }
     
     // Navigate to confirmation page with the stored data
+    console.log('Navigating to order confirmation page with state:', confirmationData);
     navigate('/order-confirmation', {
       state: confirmationData,
       replace: true

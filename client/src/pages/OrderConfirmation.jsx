@@ -41,13 +41,24 @@ const OrderConfirmation = () => {
   useEffect(() => {
     // Check if we have order data from location state
     if (location.state) {
-      console.log('Order confirmation data:', location.state);
+      console.log('Order confirmation data received:', location.state);
       setOrderData(location.state);
       setLoading(false);
     } else {
       // If no order data in state, redirect to home
-      console.warn('No order data found in location state');
-      navigate('/', { replace: true });
+      console.error('No order data found in location state', {
+        locationState: location.state,
+        locationPathname: location.pathname,
+        locationSearch: location.search
+      });
+      
+      // Show alert before redirecting
+      alert('Order confirmation data not found. You will be redirected to the home page.');
+      
+      // Redirect after a short delay
+      setTimeout(() => {
+        navigate('/', { replace: true });
+      }, 1000);
     }
   }, [location, navigate]);
 

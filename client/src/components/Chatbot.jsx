@@ -26,6 +26,7 @@ import {
   Help as HelpIcon,
   Notifications as NotificationsIcon,
   Refresh as RefreshIcon,
+  Info as InfoIcon,
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -286,329 +287,132 @@ const Chatbot = () => {
     { text: "Return policy", icon: <HelpIcon fontSize="small" />, query: "Return policy" },
   ];
 
+  // Simple toggle function for opening/closing the chat
+  const toggleChat = () => {
+    setIsOpen(!isOpen);
+    setShowBadge(false);
+  };
+
+  // Help button handlers
+  const handleHelp = () => {
+    navigate('/faq');
+  };
+
+  const handleContact = () => {
+    window.location.href = 'mailto:support@swiftbuyz.com';
+  };
+
   return (
-    <Box sx={{ 
-      position: 'fixed', 
-      bottom: 20, 
-      right: 20, 
-      zIndex: 999,
-      '& .chat-container': {
-        position: 'absolute',
-        bottom: '70px',
-        right: 0,
-      }
-    }}>
-      <Collapse in={isOpen} timeout="auto" className="chat-container">
+    <Box sx={{ position: 'fixed', bottom: 16, right: 16, zIndex: 1000 }}>
+      {/* Chat bubble button */}
+      <Badge color="error" variant="dot" invisible={!showBadge}>
+        <Fab 
+          color="primary" 
+          onClick={toggleChat}
+          sx={{ 
+            boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+            '&:hover': {
+              transform: 'translateY(-5px)',
+              boxShadow: '0 6px 25px rgba(0,0,0,0.3)',
+            },
+            transition: 'all 0.3s ease'
+          }}
+        >
+          {isOpen ? <CloseIcon /> : <ChatIcon />}
+        </Fab>
+      </Badge>
+
+      {/* Chat window */}
+      <Collapse in={isOpen} sx={{ position: 'absolute', bottom: 80, right: 0 }}>
         <Paper
-          elevation={3}
+          elevation={6}
           sx={{
-            width: 320,
-            height: 450,
-            mb: 2,
+            width: { xs: 300, sm: 350 },
+            height: 400,
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
-            borderRadius: 2,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+            borderRadius: 3,
+            boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
           }}
         >
-          {/* Chat Header */}
+          {/* Chat header */}
           <Box
             sx={{
               p: 2,
-              background: 'linear-gradient(135deg, #1a237e 0%, #0d47a1 100%)',
+              bgcolor: 'primary.main',
               color: 'white',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
             }}
           >
-            <Typography variant="h6">Customer Support</Typography>
-            <Box>
-              <IconButton 
-                size="small" 
-                onClick={handleResetChat} 
-                sx={{ color: 'white', mr: 1 }}
-                title="Reset conversation"
-              >
-                <RefreshIcon fontSize="small" />
-              </IconButton>
-              <IconButton 
-                size="small" 
-                onClick={() => setIsOpen(false)} 
-                sx={{ color: 'white' }}
-                title="Close chat"
-              >
-                <CloseIcon />
-              </IconButton>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Avatar sx={{ bgcolor: 'white', mr: 1 }}>
+                <ChatIcon color="primary" />
+              </Avatar>
+              <Typography variant="h6">Support</Typography>
             </Box>
+            <IconButton onClick={toggleChat} color="inherit" size="small">
+              <CloseIcon />
+            </IconButton>
           </Box>
 
-          {/* Messages Area */}
+          {/* Chat body - maintenance message */}
           <Box
             sx={{
               flex: 1,
-              overflowY: 'auto',
-              p: 2,
+              p: 3,
               display: 'flex',
               flexDirection: 'column',
-              gap: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              overflowY: 'hidden',
+              bgcolor: '#f9f9f9',
             }}
           >
-            {!isAuthenticated && (
-              <Alert 
-                severity="info" 
-                sx={{ mb: 2 }}
-                action={
-                  <IconButton
-                    color="inherit"
-                    size="small"
-                    onClick={handleLogin}
-                  >
-                    <LoginIcon />
-                  </IconButton>
-                }
-              >
-                Log in for personalized support
-              </Alert>
-            )}
-            
-            {messages.map((message, index) => (
-              <Box
-                key={index}
-                sx={{
-                  display: 'flex',
-                  justifyContent: message.type === 'user' ? 'flex-end' : 'flex-start',
-                  gap: 1,
-                }}
-              >
-                {message.type === 'bot' && (
-                  <Avatar
-                    sx={{
-                      bgcolor: '#1a237e',
-                      width: 32,
-                      height: 32,
-                    }}
-                  >
-                    CS
-                  </Avatar>
-                )}
-                <Paper
-                  sx={{
-                    p: 1,
-                    px: 2,
-                    maxWidth: '70%',
-                    bgcolor: message.type === 'user' ? '#1a237e' : '#f5f5f5',
-                    color: message.type === 'user' ? 'white' : 'text.primary',
-                  }}
-                >
-                  <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
-                    {message.content}
-                  </Typography>
-                </Paper>
-              </Box>
-            ))}
-
-            {/* Quick option buttons */}
-            {showOptions && (
-              <Box sx={{ mt: 2, mb: 1 }}>
-                <Typography variant="caption" sx={{ display: 'block', mb: 1, color: 'text.secondary' }}>
-                  How can I help you today?
-                </Typography>
-                <Stack spacing={1}>
-                  {quickOptions.map((option, index) => (
-                    <Button
-                      key={index}
-                      variant="outlined"
-                      size="small"
-                      startIcon={option.icon}
-                      onClick={() => handleQuickOption(option.query)}
-                      sx={{ 
-                        justifyContent: 'flex-start',
-                        textTransform: 'none',
-                        borderColor: '#e0e0e0',
-                        '&:hover': { borderColor: '#1a237e', bgcolor: 'rgba(26, 35, 126, 0.04)' }
-                      }}
-                    >
-                      {option.text}
-                    </Button>
-                  ))}
-                </Stack>
-              </Box>
-            )}
-
-            {/* Follow-up questions */}
-            {showFollowUp && (
-              <Box sx={{ mt: 2, mb: 1 }}>
-                <Typography variant="caption" sx={{ display: 'block', mb: 1, color: 'text.secondary' }}>
-                  You might also want to know:
-                </Typography>
-                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                  {followUpQuestions.map((question, index) => (
-                    <Chip
-                      key={index}
-                      label={question}
-                      onClick={() => handleFollowUpClick(question)}
-                      sx={{ 
-                        mb: 1, 
-                        borderColor: '#e0e0e0',
-                        '&:hover': { borderColor: '#1a237e', bgcolor: 'rgba(26, 35, 126, 0.04)' }
-                      }}
-                      variant="outlined"
-                      clickable
-                    />
-                  ))}
-                </Stack>
-              </Box>
-            )}
-
-            {isTyping && (
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Avatar
-                  sx={{
-                    bgcolor: '#1a237e',
-                    width: 32,
-                    height: 32,
-                  }}
-                >
-                  CS
-                </Avatar>
-                <CircularProgress size={20} />
-              </Box>
-            )}
-            <div ref={messagesEndRef} />
-          </Box>
-
-          {/* Input Area */}
-          <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSend();
+            <Alert 
+              severity="info" 
+              icon={<InfoIcon />}
+              sx={{ 
+                mb: 3, 
+                width: '100%',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
               }}
-              style={{ display: 'flex', gap: 8 }}
             >
-              <TextField
-                fullWidth
-                size="small"
-                placeholder="Type your message..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                disabled={isTyping}
-              />
-              <IconButton 
-                type="submit" 
-                color="primary" 
-                disabled={!input.trim() || isTyping}
-              >
-                <SendIcon />
-              </IconButton>
-            </form>
-          </Box>
-        </Paper>
-      </Collapse>
-
-      {/* Welcome Tooltip */}
-      <Collapse 
-        in={showWelcomeTooltip} 
-        timeout="auto"
-        sx={{ 
-          position: 'absolute', 
-          bottom: 70, 
-          right: 0, 
-          width: 250,
-          zIndex: 1001,
-        }}
-      >
-        <Paper
-          elevation={4}
-          sx={{
-            p: 2,
-            borderRadius: 2,
-            bgcolor: '#e3f2fd',
-            border: '1px solid #bbdefb',
-            position: 'relative',
-            '&:after': {
-              content: '""',
-              position: 'absolute',
-              bottom: -10,
-              right: 20,
-              width: 0,
-              height: 0,
-              borderLeft: '10px solid transparent',
-              borderRight: '10px solid transparent',
-              borderTop: '10px solid #e3f2fd',
-            }
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-            <ChatIcon color="primary" />
-            <Box>
-              <Typography variant="subtitle2" color="primary" gutterBottom>
-                Need help with anything?
+              <Typography variant="subtitle1" fontWeight="bold">
+                Chat Support Unavailable
               </Typography>
               <Typography variant="body2">
-                I'm your virtual assistant. Click here to chat with me!
+                Our chat support is currently undergoing maintenance.
               </Typography>
-            </Box>
+            </Alert>
+            
+            <Typography variant="body1" gutterBottom textAlign="center" sx={{ mb: 3 }}>
+              Please use one of the following options to get help:
+            </Typography>
+            
+            <Stack spacing={2} sx={{ width: '100%' }}>
+              <Button 
+                variant="contained" 
+                onClick={handleHelp}
+                fullWidth
+                sx={{ borderRadius: 2 }}
+              >
+                Visit FAQ Page
+              </Button>
+              <Button 
+                variant="outlined"
+                onClick={handleContact}
+                fullWidth
+                sx={{ borderRadius: 2 }}
+              >
+                Email Support
+              </Button>
+            </Stack>
           </Box>
-          <IconButton
-            size="small"
-            sx={{ position: 'absolute', top: 2, right: 2 }}
-            onClick={() => {
-              setShowWelcomeTooltip(false);
-              localStorage.setItem('hasSeenChatWelcome', 'true');
-            }}
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
         </Paper>
       </Collapse>
-
-      {/* Chat Toggle Button - Positioned just under the back-to-top button */}
-      <Badge 
-        color="error" 
-        variant="dot" 
-        invisible={!showBadge}
-        overlap="circular"
-        sx={{ 
-          position: 'fixed',
-          bottom: 20,
-          right: 20,
-          zIndex: 999,
-          '& .MuiBadge-badge': { 
-            right: 10, 
-            top: 10,
-            width: 12,
-            height: 12,
-            borderRadius: '50%',
-            animation: showBadge ? 'pulse 1.5s infinite' : 'none',
-            '@keyframes pulse': {
-              '0%': { transform: 'scale(0.8)', opacity: 0.9 },
-              '50%': { transform: 'scale(1.1)', opacity: 1 },
-              '100%': { transform: 'scale(0.8)', opacity: 0.9 },
-            },
-          } 
-        }}
-      >
-        <Fab
-          color="primary"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="chat"
-          sx={{
-            bgcolor: '#1a237e',
-            '&:hover': { bgcolor: '#0d47a1' },
-            boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
-            height: 56,
-            width: 56,
-            position: 'fixed',
-            bottom: 20,
-            right: 20,
-          }}
-        >
-          {isOpen ? <CloseIcon /> : <ChatIcon />}
-        </Fab>
-      </Badge>
     </Box>
   );
 };

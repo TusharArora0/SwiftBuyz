@@ -23,13 +23,15 @@ import OrderSuccess from './pages/OrderSuccess';
 import OrderConfirmation from './pages/OrderConfirmation';
 import Footer from './components/Footer';
 import ProfileSettings from './pages/profiles/ProfileSettings';
-import Chatbot from './components/Chatbot';
 import OrderHistory from './components/OrderHistory';
 import ReturnPolicy from './pages/ReturnPolicy';
 import SellerProducts from './pages/profiles/SellerProducts';
 import ShippingPolicy from './pages/ShippingPolicy';
 import FAQ from './pages/FAQ';
 import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import NotFound from './pages/NotFound';
+import BackToTop from './components/BackToTop';
 
 // Add ScrollToTop component
 function ScrollToTop() {
@@ -122,10 +124,12 @@ function App() {
               <Route path="/shipping-policy" element={<ShippingPolicy />} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Box>
           <Footer />
-          <Chatbot />
+          <BackToTop />
         </Suspense>
       </Box>
     </Router>

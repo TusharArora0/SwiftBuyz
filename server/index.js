@@ -8,6 +8,8 @@ import productRoutes from './routes/products.js';
 import orderRoutes from './routes/orders.js';
 import adminRoutes from './routes/admin.js';
 import wishlistRoutes from './routes/wishlist.js';
+import userRoutes from './routes/users.js';
+import chatRoutes from './routes/chat.js';
 
 // Load environment variables before any other imports
 dotenv.config();
@@ -60,6 +62,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Print registered routes
 console.log('Mounted routes:');

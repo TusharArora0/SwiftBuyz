@@ -290,6 +290,9 @@ const Navbar = (props) => {
   const fetchWishlistCount = async () => {
     try {
       const token = localStorage.getItem('token');
+      
+      if (!token) return;
+      
       const response = await fetch('https://swiftbuyz-five.vercel.app/api/wishlist', {
         headers: {
           'Authorization': `Bearer ${token}`

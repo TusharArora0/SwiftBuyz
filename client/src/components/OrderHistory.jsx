@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -35,6 +35,7 @@ const OrderHistory = () => {
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
   const isStandalonePage = location.pathname === '/profile/orders';
 
   useEffect(() => {
@@ -44,9 +45,16 @@ const OrderHistory = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      
       const response = await fetch('https://swiftbuyz-five.vercel.app/api/orders/user', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 
@@ -67,10 +75,12 @@ const OrderHistory = () => {
 
   const handleCancelOrder = async (orderId) => {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`https://swiftbuyz-five.vercel.app/api/orders/${orderId}/cancel`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
 

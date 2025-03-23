@@ -137,7 +137,8 @@ const Home = () => {
 
   const fetchProducts = async () => {
     try {
-      // Fetch flash sale products
+      setLoading(true);
+      // Fetch flash deals
       const flashResponse = await fetch('https://swiftbuyz-five.vercel.app/api/products/deals');
       const flashData = await flashResponse.json();
       setFlashSaleProducts(flashData);

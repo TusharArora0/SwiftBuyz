@@ -37,7 +37,7 @@ const SellerProducts = () => {
   const fetchSellerProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`swiftbuyz-five.vercel.app/api/products/seller/${user.id}`, {
+      const response = await fetch(`https://swiftbuyz-five.vercel.app/api/products/seller/${user.id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -59,7 +59,7 @@ const SellerProducts = () => {
     }
 
     try {
-      const response = await fetch(`swiftbuyz-five.vercel.app/api/products/${productId}`, {
+      const response = await fetch(`https://swiftbuyz-five.vercel.app/api/products/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

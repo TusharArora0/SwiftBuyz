@@ -122,54 +122,52 @@ const About = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Only fetch products data since other endpoints require authentication
+        // Fetch product count
         const productsResponse = await fetch('https://swiftbuyz-five.vercel.app/api/products');
-        if (productsResponse.ok) {
-          const products = await productsResponse.json();
-          
-          // Get product count
-          const productCount = products.length;
-          
-          // Get unique categories count
-          const uniqueCategories = new Set();
-          products.forEach(product => {
-            if (product.category) {
-              uniqueCategories.add(product.category);
-            }
-          });
-          const categoryCount = uniqueCategories.size;
-          
-          // Get unique sellers count
-          const uniqueSellers = new Set();
-          products.forEach(product => {
-            if (product.seller) {
-              uniqueSellers.add(typeof product.seller === 'object' ? product.seller._id : product.seller);
-            }
-          });
-          const sellerCount = uniqueSellers.size;
-          
-          // Estimate customer count based on product reviews
-          let customerSet = new Set();
-          products.forEach(product => {
-            if (product.reviews && Array.isArray(product.reviews)) {
-              product.reviews.forEach(review => {
-                if (review.user) {
-                  customerSet.add(typeof review.user === 'object' ? review.user._id : review.user);
-                }
-              });
-            }
-          });
-          const customerCount = Math.max(customerSet.size, 500); // Use at least 500 as a minimum
-          
-          // Update all stats based on product data
-          setStats([
-            { number: customerCount.toString(), label: 'Happy Customers' },
-            { number: productCount.toString(), label: 'Products Available' },
-            { number: sellerCount.toString(), label: 'Active Sellers' },
-            { number: categoryCount.toString(), label: 'Product Categories' },
-            { number: Math.round(productCount * 1.5).toString(), label: 'Orders Completed' } // Estimate orders as 1.5x products
-          ]);
-        }
+        const productsData = await productsResponse.json();
+        
+        // Get product count
+        const productCount = productsData.length;
+        
+        // Get unique categories count
+        const uniqueCategories = new Set();
+        productsData.forEach(product => {
+          if (product.category) {
+            uniqueCategories.add(product.category);
+          }
+        });
+        const categoryCount = uniqueCategories.size;
+        
+        // Get unique sellers count
+        const uniqueSellers = new Set();
+        productsData.forEach(product => {
+          if (product.seller) {
+            uniqueSellers.add(typeof product.seller === 'object' ? product.seller._id : product.seller);
+          }
+        });
+        const sellerCount = uniqueSellers.size;
+        
+        // Estimate customer count based on product reviews
+        let customerSet = new Set();
+        productsData.forEach(product => {
+          if (product.reviews && Array.isArray(product.reviews)) {
+            product.reviews.forEach(review => {
+              if (review.user) {
+                customerSet.add(typeof review.user === 'object' ? review.user._id : review.user);
+              }
+            });
+          }
+        });
+        const customerCount = Math.max(customerSet.size, 500); // Use at least 500 as a minimum
+        
+        // Update all stats based on product data
+        setStats([
+          { number: customerCount.toString(), label: 'Happy Customers' },
+          { number: productCount.toString(), label: 'Products Available' },
+          { number: sellerCount.toString(), label: 'Active Sellers' },
+          { number: categoryCount.toString(), label: 'Product Categories' },
+          { number: Math.round(productCount * 1.5).toString(), label: 'Orders Completed' } // Estimate orders as 1.5x products
+        ]);
       } catch (error) {
         console.error('Error fetching stats:', error);
         // Stats will remain at their default values

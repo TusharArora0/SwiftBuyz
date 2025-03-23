@@ -188,7 +188,7 @@ const Checkout = () => {
         throw new Error('Authentication token is missing. Please log in again.');
       }
 
-      const response = await fetch('swiftbuyz-five.vercel.app/api/orders', {
+      const response = await fetch('https://swiftbuyz-five.vercel.app/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

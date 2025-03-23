@@ -100,7 +100,7 @@ const Chatbot = () => {
     
     try {
       setIsTyping(true);
-      const response = await fetch('swiftbuyz-five.vercel.app/api/chat/history', {
+      const response = await fetch('https://swiftbuyz-five.vercel.app/api/chat/history', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -202,8 +202,8 @@ const Chatbot = () => {
     try {
       // Use different endpoints based on authentication status
       const endpoint = isAuthenticated 
-        ? 'swiftbuyz-five.vercel.app/api/chat/message' 
-        : 'swiftbuyz-five.vercel.app/api/chat/public';
+        ? 'https://swiftbuyz-five.vercel.app/api/chat/message' 
+        : 'https://swiftbuyz-five.vercel.app/api/chat/public';
       
       const headers = {
         'Content-Type': 'application/json',

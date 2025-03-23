@@ -60,6 +60,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedAddressIndex, setSelectedAddressIndex] = useState(-1);
+  const [selectedAddress, setSelectedAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
@@ -86,6 +87,15 @@ const Checkout = () => {
       }
     }
   }, [user, items, navigate, orderPlaced]);
+
+  // Update selectedAddress whenever selectedAddressIndex changes
+  useEffect(() => {
+    if (selectedAddressIndex !== -1 && user?.addresses?.[selectedAddressIndex]) {
+      setSelectedAddress(user.addresses[selectedAddressIndex]);
+    } else {
+      setSelectedAddress(null);
+    }
+  }, [selectedAddressIndex, user]);
 
   const calculateSubtotal = () => {
     return items.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -832,16 +842,16 @@ const Checkout = () => {
             <Typography variant="h6" gutterBottom>
               Shipping Address
             </Typography>
-            {selectedAddressIndex !== -1 && user?.addresses?.[selectedAddressIndex] && (
+            {selectedAddress && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="body1" fontWeight="medium">
-                  {user.addresses[selectedAddressIndex].street}
+                  {selectedAddress.street}
                 </Typography>
                 <Typography variant="body2">
-                  {`${user.addresses[selectedAddressIndex].city}, ${user.addresses[selectedAddressIndex].state} ${user.addresses[selectedAddressIndex].zipCode}`}
+                  {`${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.zipCode}`}
                 </Typography>
                 <Typography variant="body2">
-                  {user.addresses[selectedAddressIndex].country}
+                  {selectedAddress.country}
                 </Typography>
               </Box>
             )}
@@ -984,7 +994,7 @@ const Checkout = () => {
             variant="contained"
             onClick={handleNext}
             disabled={
-              (activeStep === 0 && selectedAddressIndex === -1) || 
+              (activeStep === 0 && !selectedAddress) || 
               loading
             }
             sx={{ 

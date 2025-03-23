@@ -32,6 +32,7 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import NotFound from './pages/NotFound';
 import BackToTop from './components/BackToTop';
+import Chatbot from './components/Chatbot';
 
 // Add ScrollToTop component
 function ScrollToTop() {
@@ -130,6 +131,7 @@ function App() {
           </Box>
           <Footer />
           <BackToTop />
+          <Chatbot />
         </Suspense>
       </Box>
     </Router>

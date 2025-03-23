@@ -76,7 +76,7 @@ const OrderSuccessAnimation = ({ open, onAnimationComplete }) => {
           minHeight: 200
         }}>
           {!showCheckmark ? (
-            <Fade in={!showCheckmark}>
+            <Fade in={true}>
               <Box sx={{ textAlign: 'center' }}>
                 <CircularProgress 
                   size={80} 
@@ -96,7 +96,7 @@ const OrderSuccessAnimation = ({ open, onAnimationComplete }) => {
               </Box>
             </Fade>
           ) : (
-            <Zoom in={showCheckmark} style={{ transitionDelay: '300ms' }}>
+            <Zoom in={true} style={{ transitionDelay: '300ms' }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Box sx={{ 
                   bgcolor: 'success.light', 

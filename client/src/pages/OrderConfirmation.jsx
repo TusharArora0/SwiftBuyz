@@ -39,6 +39,10 @@ const OrderConfirmation = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('OrderConfirmation component mounted');
+    console.log('Location state:', location.state);
+    console.log('Location pathname:', location.pathname);
+    
     // First try to get order data from location state
     if (location.state) {
       console.log('Order confirmation data received from location state:', location.state);
@@ -49,13 +53,22 @@ const OrderConfirmation = () => {
     
     // If not in location state, try to get from sessionStorage
     try {
+      console.log('Checking sessionStorage for order data');
       const storedData = sessionStorage.getItem('orderConfirmationData');
+      console.log('Raw sessionStorage data:', storedData);
+      
       if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        console.log('Order confirmation data retrieved from sessionStorage:', parsedData);
-        setOrderData(parsedData);
-        setLoading(false);
-        return;
+        try {
+          const parsedData = JSON.parse(storedData);
+          console.log('Order confirmation data retrieved from sessionStorage:', parsedData);
+          setOrderData(parsedData);
+          setLoading(false);
+          return;
+        } catch (parseError) {
+          console.error('Error parsing sessionStorage data:', parseError);
+        }
+      } else {
+        console.log('No data found in sessionStorage');
       }
     } catch (error) {
       console.error('Error getting data from sessionStorage:', error);
@@ -81,8 +94,10 @@ const OrderConfirmation = () => {
 
   // When component unmounts or after successful display, clear the session storage
   useEffect(() => {
+    // Only clean up when component unmounts
     return () => {
       if (orderData) {
+        console.log('Cleaning up sessionStorage - orderData was loaded successfully');
         // Only clear if we successfully loaded the data
         sessionStorage.removeItem('orderConfirmationData');
       }

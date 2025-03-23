@@ -122,72 +122,45 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = async () => {
-    if (selectedAddressIndex === -1) {
-      setError('Please select a shipping address');
-      return;
-    }
-
-    // Validate payment method specific fields
-    if (paymentMethod === 'card') {
-      // In a real app, you would validate card details here
-      // For this demo, we'll just simulate a successful payment
-    } else if (paymentMethod === 'upi') {
-      // Validate UPI ID
-      const upiInput = document.querySelector('input[placeholder="yourname@upi"]');
-      if (upiInput && (!upiInput.value || !upiInput.value.includes('@'))) {
-        setError('Please enter a valid UPI ID');
+    try {
+      if (!selectedAddress) {
+        setError('Please select a shipping address');
         return;
       }
-    }
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const selectedAddress = user.addresses[selectedAddressIndex];
-      
-      // Map our UI payment methods to server-expected values
-      let serverPaymentMethod = 'cod';
-      if (paymentMethod === 'card' || paymentMethod === 'upi' || paymentMethod === 'netbanking') {
-        serverPaymentMethod = 'online';
+      if (!paymentMethod) {
+        setError('Please select a payment method');
+        return;
       }
-      
-      // Format items according to the server's expected structure
-      // Make sure we're using the correct product ID format
-      const orderItems = items.map(item => {
-        // Ensure the product ID is a string
-        const productId = typeof item._id === 'string' ? item._id : String(item._id);
-        
-        return {
-          product: productId,
-          quantity: item.quantity,
-          price: item.price
-        };
-      });
 
-      console.log('Order items:', orderItems);
-      
-      // Create a properly formatted order object
+      if (items.length === 0) {
+        setError('Your cart is empty');
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login', { state: { from: '/checkout' } });
+        return;
+      }
+
       const orderData = {
-        items: orderItems,
-        shippingAddress: {
-          street: selectedAddress.street,
-          city: selectedAddress.city,
-          state: selectedAddress.state,
-          zipCode: selectedAddress.zipCode,
-          country: selectedAddress.country || 'India'
-        },
-        paymentMethod: serverPaymentMethod,
-        totalAmount: calculateTotal()
+        items: items.map(item => ({
+          product: item.id,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        shippingAddress: selectedAddress,
+        paymentMethod,
+        totalAmount: calculateTotal(),
       };
 
-      console.log('Sending order data:', JSON.stringify(orderData, null, 2));
+      console.log('Placing order with data:', orderData);
 
-      // Make sure we have a valid token
-      if (!token) {
-        throw new Error('Authentication token is missing. Please log in again.');
-      }
-
+      // API call to create order
       const response = await fetch('https://swiftbuyz-five.vercel.app/api/orders', {
         method: 'POST',
         headers: {
@@ -197,10 +170,8 @@ const Checkout = () => {
         body: JSON.stringify(orderData)
       });
 
-      console.log('Response status:', response.status);
-      
       const responseText = await response.text();
-      console.log('Response text:', responseText);
+      console.log('API Response text:', responseText);
 
       if (!response.ok) {
         let errorMessage = 'Failed to place order';
@@ -255,17 +226,25 @@ const Checkout = () => {
       setConfirmationData(orderConfirmationData);
       
       // Also store in sessionStorage in case React Router loses the state
+      console.log('Storing confirmation data in sessionStorage', orderConfirmationData);
       sessionStorage.setItem('orderConfirmationData', JSON.stringify(orderConfirmationData));
       
       // Show success animation
       setLoading(false);
       setShowSuccessAnimation(true);
       
+      // Debug what's in session storage
+      console.log('Current sessionStorage:', sessionStorage.getItem('orderConfirmationData'));
+      
       // Backup: If animation doesn't trigger navigation, do it directly after 5 seconds
       setTimeout(() => {
         if (showSuccessAnimation) {
-          console.log('Animation callback not triggered, navigating directly to confirmation page');
+          console.log('Animation callback not triggered after 5s, navigating directly to confirmation page');
           setShowSuccessAnimation(false);
+          
+          // Double check session storage before navigating
+          console.log('Final sessionStorage check:', sessionStorage.getItem('orderConfirmationData'));
+          
           navigate('/order-confirmation', {
             state: orderConfirmationData,
             replace: true
@@ -298,6 +277,7 @@ const Checkout = () => {
 
   // Handle completion of success animation
   const handleAnimationComplete = () => {
+    console.log('handleAnimationComplete called');
     setShowSuccessAnimation(false);
     
     console.log('Animation completed, preparing to navigate to confirmation page');
@@ -305,7 +285,28 @@ const Checkout = () => {
     
     // Make sure we have confirmation data before navigating
     if (!confirmationData) {
-      console.error('Missing confirmation data');
+      console.error('Missing confirmation data, checking sessionStorage');
+      
+      // Try to retrieve from sessionStorage as fallback
+      try {
+        const storedData = sessionStorage.getItem('orderConfirmationData');
+        if (storedData) {
+          const parsedData = JSON.parse(storedData);
+          console.log('Retrieved confirmation data from sessionStorage:', parsedData);
+          
+          // Navigate with the retrieved data
+          navigate('/order-confirmation', {
+            state: parsedData,
+            replace: true
+          });
+          return;
+        }
+      } catch (error) {
+        console.error('Error retrieving from sessionStorage:', error);
+      }
+      
+      // If we still don't have data, go to orders page
+      console.error('No confirmation data available, redirecting to orders page');
       navigate('/profile/orders', { replace: true });
       return;
     }
@@ -314,12 +315,17 @@ const Checkout = () => {
     console.log('Navigating to order confirmation page with state:', confirmationData);
     
     // Ensure data is in sessionStorage before navigation
+    console.log('Ensuring data is in sessionStorage before navigation');
     sessionStorage.setItem('orderConfirmationData', JSON.stringify(confirmationData));
     
-    navigate('/order-confirmation', {
-      state: confirmationData,
-      replace: true
-    });
+    // Force a small delay before navigation to ensure state is properly set
+    setTimeout(() => {
+      console.log('Executing navigation after delay');
+      navigate('/order-confirmation', {
+        state: confirmationData,
+        replace: true
+      });
+    }, 100);
   };
 
   const renderAddressSelection = () => (

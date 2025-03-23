@@ -254,6 +254,9 @@ const Checkout = () => {
       // Store confirmation data for later use
       setConfirmationData(orderConfirmationData);
       
+      // Also store in sessionStorage in case React Router loses the state
+      sessionStorage.setItem('orderConfirmationData', JSON.stringify(orderConfirmationData));
+      
       // Show success animation
       setLoading(false);
       setShowSuccessAnimation(true);
@@ -309,6 +312,10 @@ const Checkout = () => {
     
     // Navigate to confirmation page with the stored data
     console.log('Navigating to order confirmation page with state:', confirmationData);
+    
+    // Ensure data is in sessionStorage before navigation
+    sessionStorage.setItem('orderConfirmationData', JSON.stringify(confirmationData));
+    
     navigate('/order-confirmation', {
       state: confirmationData,
       replace: true

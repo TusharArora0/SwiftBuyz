@@ -39,28 +39,55 @@ const OrderConfirmation = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if we have order data from location state
+    // First try to get order data from location state
     if (location.state) {
-      console.log('Order confirmation data received:', location.state);
+      console.log('Order confirmation data received from location state:', location.state);
       setOrderData(location.state);
       setLoading(false);
-    } else {
-      // If no order data in state, redirect to home
-      console.error('No order data found in location state', {
-        locationState: location.state,
-        locationPathname: location.pathname,
-        locationSearch: location.search
-      });
-      
-      // Show alert before redirecting
-      alert('Order confirmation data not found. You will be redirected to the home page.');
-      
-      // Redirect after a short delay
-      setTimeout(() => {
-        navigate('/', { replace: true });
-      }, 1000);
+      return;
     }
+    
+    // If not in location state, try to get from sessionStorage
+    try {
+      const storedData = sessionStorage.getItem('orderConfirmationData');
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        console.log('Order confirmation data retrieved from sessionStorage:', parsedData);
+        setOrderData(parsedData);
+        setLoading(false);
+        return;
+      }
+    } catch (error) {
+      console.error('Error getting data from sessionStorage:', error);
+    }
+    
+    // If we still don't have the data, show error and redirect
+    console.error('No order data found in location state or sessionStorage', {
+      locationState: location.state,
+      locationPathname: location.pathname,
+      locationSearch: location.search,
+      sessionStorageData: sessionStorage.getItem('orderConfirmationData')
+    });
+    
+    // Show alert before redirecting
+    alert('Order confirmation data not found. You will be redirected to the home page.');
+    
+    // Redirect after a short delay
+    setTimeout(() => {
+      navigate('/', { replace: true });
+    }, 1000);
+    
   }, [location, navigate]);
+
+  // When component unmounts or after successful display, clear the session storage
+  useEffect(() => {
+    return () => {
+      if (orderData) {
+        // Only clear if we successfully loaded the data
+        sessionStorage.removeItem('orderConfirmationData');
+      }
+    };
+  }, [orderData]);
 
   // Format date to readable format
   const formatDate = (dateString) => {

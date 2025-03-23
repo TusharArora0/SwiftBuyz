@@ -14,32 +14,43 @@ const OrderSuccessAnimation = ({ open, onAnimationComplete }) => {
   const [showCheckmark, setShowCheckmark] = useState(false);
   
   useEffect(() => {
+    let timer = null;
+    let completeTimer = null;
+    
     if (open) {
       console.log('OrderSuccessAnimation opened');
       
       // Show loading spinner for 2 seconds, then show checkmark
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         console.log('Showing checkmark');
         setShowCheckmark(true);
       }, 2000);
       
       // After showing checkmark for 1.5 seconds, trigger completion callback
-      const completeTimer = setTimeout(() => {
+      completeTimer = setTimeout(() => {
         console.log('Animation complete, calling onAnimationComplete');
         if (onAnimationComplete && typeof onAnimationComplete === 'function') {
-          onAnimationComplete();
+          try {
+            onAnimationComplete();
+            console.log('Animation completion callback executed successfully');
+          } catch (error) {
+            console.error('Error in animation completion callback:', error);
+            // If the callback throws an error, we still want to close the dialog
+            setShowCheckmark(false);
+          }
         } else {
           console.error('onAnimationComplete is not a valid function', onAnimationComplete);
         }
       }, 3500);
-      
-      return () => {
-        clearTimeout(timer);
-        clearTimeout(completeTimer);
-      };
     } else {
       setShowCheckmark(false);
     }
+    
+    // Cleanup function to clear timeouts
+    return () => {
+      if (timer) clearTimeout(timer);
+      if (completeTimer) clearTimeout(completeTimer);
+    };
   }, [open, onAnimationComplete]);
   
   return (

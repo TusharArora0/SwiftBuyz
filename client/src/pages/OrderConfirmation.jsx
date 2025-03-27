@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
   Container,
   Paper,
@@ -31,6 +32,8 @@ import {
 } from '@mui/icons-material';
 import { formatPrice } from '../utils/formatPrice';
 import { PLACEHOLDER_IMAGE } from '../utils/placeholderImage';
+import { fetchWithAuth } from '../utils/api';
+import { API_URL } from '../utils/apiConfig';
 
 const OrderConfirmation = () => {
   const location = useLocation();
@@ -362,4 +365,4 @@ const OrderConfirmation = () => {
   );
 };
 
-export default OrderConfirmation; 
+export default OrderConfirmation;

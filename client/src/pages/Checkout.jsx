@@ -238,6 +238,8 @@ const Checkout = () => {
       // Create confirmation data with proper order ID handling
       const orderConfirmationData = {
         orderNumber: data.order && data.order._id ? data.order._id.slice(-6) : 'NEW',
+        // Store the full order ID for navigation purposes
+        orderId: data.order && data.order._id ? data.order._id : null,
         items: items.map(item => ({
           name: item.name,
           quantity: item.quantity,
@@ -264,7 +266,7 @@ const Checkout = () => {
           console.log('Animation callback not triggered, navigating directly to confirmation page');
           setShowSuccessAnimation(false);
           // Use the order ID from the response data to create a more reliable URL
-          const orderId = data && data.order && data.order._id ? data.order._id : null;
+          const orderId = orderConfirmationData.orderId;
           if (orderId) {
             console.log('Navigating to order confirmation with ID:', orderId);
             navigate(`/order-confirmation/${orderId}`, {
@@ -317,10 +319,14 @@ const Checkout = () => {
       return;
     }
     
+    // Extract orderId from the confirmationData if available
+    // The orderNumber in confirmationData is the last 6 digits of the order ID
+    // We need to check if we have the full orderId stored somewhere in the confirmationData
+    const orderId = confirmationData.orderId || null;
+    
     // Navigate to confirmation page with the stored data
     console.log('Navigating to order confirmation page with state:', confirmationData);
-    // Use the order ID from the response data to create a more reliable URL
-    const orderId = data && data.order && data.order._id ? data.order._id : null;
+    
     if (orderId) {
       console.log('Navigating to order confirmation with ID:', orderId);
       navigate(`/order-confirmation/${orderId}`, {

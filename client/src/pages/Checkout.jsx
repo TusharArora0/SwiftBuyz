@@ -256,13 +256,17 @@ const Checkout = () => {
       // Store confirmation data for later use
       setConfirmationData(orderConfirmationData);
       
-      // Show success animation
+      // Show success animation with loading and then congratulations message
       setLoading(false);
       setShowSuccessAnimation(true);
       
-      // Always navigate to the confirmation page after a short delay, regardless of animation state
+      // The animation component will handle the transition timing
+      // We'll navigate to the confirmation page after the animation completes
+      // This is handled by the handleAnimationComplete function
+      // The timeout is longer to allow the full animation sequence to play
       setTimeout(() => {
-        console.log('Navigating directly to confirmation page');
+        // This is a fallback in case the animation completion callback doesn't trigger
+        console.log('Fallback navigation to confirmation page');
         setShowSuccessAnimation(false);
         // Use the order ID from the response data to create a more reliable URL
         const orderId = orderConfirmationData.orderId;
@@ -278,7 +282,7 @@ const Checkout = () => {
             replace: true
           });
         }
-      }, 3000);
+      }, 5000); // Increased timeout to allow full animation sequence
 
     } catch (err) {
       console.error('Order placement error:', err);

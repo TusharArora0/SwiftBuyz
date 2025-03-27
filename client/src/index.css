@@ -104,3 +104,12 @@ button:focus-visible {
     transform: translateY(0);
   }
 }
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100px) rotate(0deg);
+  }
+  100% {
+    transform: translateY(500px) rotate(360deg);
+  }
+}

@@ -113,6 +113,7 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+          <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
               <Route 
                 path="/profile/settings" 
                 element={

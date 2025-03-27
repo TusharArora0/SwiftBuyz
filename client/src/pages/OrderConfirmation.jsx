@@ -41,27 +41,75 @@ const OrderConfirmation = () => {
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const params = useParams();
+  const { user } = useSelector(state => state.auth);
+
   useEffect(() => {
+    const fetchOrderData = async (orderId) => {
+      try {
+        console.log('Fetching order data for ID:', orderId);
+        const response = await fetchWithAuth(`${API_URL}/orders/${orderId}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch order data');
+        }
+        
+        const data = await response.json();
+        console.log('Order data fetched successfully:', data);
+        
+        // Format the order data to match the expected structure
+        const formattedOrderData = {
+          orderNumber: data._id ? data._id.slice(-6) : 'N/A',
+          items: data.items ? data.items.map(item => ({
+            name: item.product ? item.product.name : 'Product',
+            quantity: item.quantity || 1,
+            price: item.price || 0,
+            discount: item.discount || 0,
+            image: item.product && item.product.images && item.product.images.length > 0 
+              ? item.product.images[0].url 
+              : PLACEHOLDER_IMAGE
+          })) : [],
+          totalAmount: data.totalAmount || 0,
+          shippingAddress: data.shippingAddress || {},
+          paymentMethod: data.paymentMethod === 'cod' ? 'Cash on Delivery' : data.paymentMethod,
+          orderDate: data.createdAt || new Date().toISOString()
+        };
+        
+        setOrderData(formattedOrderData);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching order data:', error);
+        setLoading(false);
+      }
+    };
+
     // Check if we have order data from location state
     if (location.state) {
-      console.log('Order confirmation data received:', location.state);
+      console.log('Order confirmation data received from location state:', location.state);
       setOrderData(location.state);
       setLoading(false);
+    } 
+    // Check if we have an order ID in the URL parameters or from useParams
+    else if (params.orderId || location.pathname.includes('/order-confirmation/') || location.search.includes('orderId=')) {
+      const orderId = params.orderId || 
+                     location.pathname.split('/order-confirmation/')[1] || 
+                     new URLSearchParams(location.search).get('orderId');
+      
+      if (orderId) {
+        console.log('Order ID found in URL:', orderId);
+        fetchOrderData(orderId);
+      } else {
+        console.error('No order ID found in URL parameters');
+        setLoading(false);
+      }
     } else {
-      // If no order data in state, redirect to home
-      console.error('No order data found in location state', {
+      // No order data in state and no order ID in URL
+      console.error('No order data found in location state or URL parameters', {
         locationState: location.state,
         locationPathname: location.pathname,
         locationSearch: location.search
       });
-      
-      // Show alert before redirecting
-      alert('Order confirmation data not found. You will be redirected to the home page.');
-      
-      // Redirect after a short delay
-      setTimeout(() => {
-        navigate('/', { replace: true });
-      }, 1000);
+      setLoading(false);
     }
   }, [location, navigate]);
 

@@ -49,6 +49,7 @@ const OrderSuccessAnimation = ({ open, onAnimationComplete }) => {
       open={open} 
       maxWidth="sm" 
       fullWidth
+      style={{ zIndex: 9999 }}
       PaperProps={{
         sx: { 
           borderRadius: 4,

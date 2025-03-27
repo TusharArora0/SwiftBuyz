@@ -263,10 +263,20 @@ const Checkout = () => {
         if (showSuccessAnimation) {
           console.log('Animation callback not triggered, navigating directly to confirmation page');
           setShowSuccessAnimation(false);
-          navigate('/order-confirmation', {
-            state: orderConfirmationData,
-            replace: true
-          });
+          // Use the order ID from the response data to create a more reliable URL
+          const orderId = data && data.order && data.order._id ? data.order._id : null;
+          if (orderId) {
+            console.log('Navigating to order confirmation with ID:', orderId);
+            navigate(`/order-confirmation/${orderId}`, {
+              state: orderConfirmationData,
+              replace: true
+            });
+          } else {
+            navigate('/order-confirmation', {
+              state: orderConfirmationData,
+              replace: true
+            });
+          }
         }
       }, 5000);
 
@@ -309,10 +319,20 @@ const Checkout = () => {
     
     // Navigate to confirmation page with the stored data
     console.log('Navigating to order confirmation page with state:', confirmationData);
-    navigate('/order-confirmation', {
-      state: confirmationData,
-      replace: true
-    });
+    // Use the order ID from the response data to create a more reliable URL
+    const orderId = data && data.order && data.order._id ? data.order._id : null;
+    if (orderId) {
+      console.log('Navigating to order confirmation with ID:', orderId);
+      navigate(`/order-confirmation/${orderId}`, {
+        state: confirmationData,
+        replace: true
+      });
+    } else {
+      navigate('/order-confirmation', {
+        state: confirmationData,
+        replace: true
+      });
+    }
   };
 
   const renderAddressSelection = () => (
@@ -995,4 +1015,4 @@ const Checkout = () => {
   );
 };
 
-export default Checkout; 
+export default Checkout;

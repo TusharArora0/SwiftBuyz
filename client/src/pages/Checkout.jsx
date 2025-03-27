@@ -260,27 +260,25 @@ const Checkout = () => {
       setLoading(false);
       setShowSuccessAnimation(true);
       
-      // Backup: If animation doesn't trigger navigation, do it directly after 5 seconds
+      // Always navigate to the confirmation page after a short delay, regardless of animation state
       setTimeout(() => {
-        if (showSuccessAnimation) {
-          console.log('Animation callback not triggered, navigating directly to confirmation page');
-          setShowSuccessAnimation(false);
-          // Use the order ID from the response data to create a more reliable URL
-          const orderId = orderConfirmationData.orderId;
-          if (orderId) {
-            console.log('Navigating to order confirmation with ID:', orderId);
-            navigate(`/order-confirmation/${orderId}`, {
-              state: orderConfirmationData,
-              replace: true
-            });
-          } else {
-            navigate('/order-confirmation', {
-              state: orderConfirmationData,
-              replace: true
-            });
-          }
+        console.log('Navigating directly to confirmation page');
+        setShowSuccessAnimation(false);
+        // Use the order ID from the response data to create a more reliable URL
+        const orderId = orderConfirmationData.orderId;
+        if (orderId) {
+          console.log('Navigating to order confirmation with ID:', orderId);
+          navigate(`/order-confirmation/${orderId}`, {
+            state: orderConfirmationData,
+            replace: true
+          });
+        } else {
+          navigate('/order-confirmation', {
+            state: orderConfirmationData,
+            replace: true
+          });
         }
-      }, 5000);
+      }, 3000);
 
     } catch (err) {
       console.error('Order placement error:', err);
@@ -329,15 +327,14 @@ const Checkout = () => {
     
     if (orderId) {
       console.log('Navigating to order confirmation with ID:', orderId);
-      navigate(`/order-confirmation/${orderId}`, {
-        state: confirmationData,
-        replace: true
-      });
+      // Force navigation with state data to ensure it works in deployed environment
+      window.location.href = `/order-confirmation/${orderId}`;
+      // Store confirmation data in sessionStorage as a backup
+      sessionStorage.setItem('orderConfirmationData', JSON.stringify(confirmationData));
     } else {
-      navigate('/order-confirmation', {
-        state: confirmationData,
-        replace: true
-      });
+      // Force navigation and store data in sessionStorage
+      window.location.href = '/order-confirmation';
+      sessionStorage.setItem('orderConfirmationData', JSON.stringify(confirmationData));
     }
   };
 

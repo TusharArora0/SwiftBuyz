@@ -48,7 +48,7 @@ const OrderSuccessAnimation = ({ open, onAnimationComplete }) => {
     <Dialog 
       open={open} 
       maxWidth="sm" 
-      fullWidth
+      fullWidth={true}
       style={{ zIndex: 9999 }}
       PaperProps={{
         sx: { 

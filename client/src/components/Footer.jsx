@@ -160,7 +160,7 @@ const Footer = () => {
               </SocialIconButton>
               <SocialIconButton 
                 color="inherit" 
-                href="https://linkedin.com" 
+                href="https://www.linkedin.com/in/tushar-arora-1aa02731a/" 
                 target="_blank"
                 aria-label="LinkedIn"
                 sx={{ animationDelay: '0.4s' }}
